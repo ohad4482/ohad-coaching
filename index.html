@@ -2169,25 +2169,31 @@ function initNutView(){rendNS();rendND();rendFCT();filterF();initMac();}
 function initBodyView(){rendWS();rendWC();rendWE();rendSt();}
 
 // ===== CLOUD SYNC =====
-const _lsSet = localStorage.setItem.bind(localStorage);
-const _lsRem = localStorage.removeItem.bind(localStorage);
 function isAppKey(k){ return k.startsWith('mc3_') || k.startsWith('omc_'); }
 
-localStorage.setItem = function(k, v){
-  _lsSet(k, v);
-  if(isAppKey(k)) fetch('/api/sync',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({key:k,value:v})}).catch(()=>{});
-};
-localStorage.removeItem = function(k){
-  _lsRem(k);
-  if(isAppKey(k)) fetch('/api/sync',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({key:k,value:''})}).catch(()=>{});
-};
+function getAllAppData(){
+  const d={};
+  for(let i=0;i<localStorage.length;i++){
+    const k=localStorage.key(i);
+    if(isAppKey(k)) d[k]=localStorage.getItem(k);
+  }
+  return d;
+}
+
+async function pushToCloud(){
+  try{
+    const d=getAllAppData();
+    if(!Object.keys(d).length) return;
+    await fetch('/api/sync/bulk',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});
+  }catch(e){}
+}
 
 async function syncFromCloud(){
   try{
-    const res = await fetch('/api/sync');
+    const res=await fetch('/api/sync');
     if(!res.ok) return;
-    const data = await res.json();
-    Object.entries(data).forEach(([k,v])=>{ if(v) _lsSet(k,v); else _lsRem(k); });
+    const data=await res.json();
+    Object.entries(data).forEach(([k,v])=>{ if(v) localStorage.setItem(k,v); else localStorage.removeItem(k); });
   }catch(e){}
 }
 
@@ -2195,6 +2201,10 @@ async function syncFromCloud(){
 document.addEventListener('DOMContentLoaded',async function(){
   await syncFromCloud();
   selRole('coach');
+  // push to cloud every 10 seconds
+  setInterval(pushToCloud, 10000);
+  // push on page hide (tab switch, close)
+  document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='hidden') pushToCloud(); });
 });
 
 </script>
