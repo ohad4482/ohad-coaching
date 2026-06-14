@@ -2168,8 +2168,32 @@ function initWorkoutView(){
 function initNutView(){rendNS();rendND();rendFCT();filterF();initMac();}
 function initBodyView(){rendWS();rendWC();rendWE();rendSt();}
 
+// ===== CLOUD SYNC =====
+const _lsSet = localStorage.setItem.bind(localStorage);
+const _lsRem = localStorage.removeItem.bind(localStorage);
+function isAppKey(k){ return k.startsWith('mc3_') || k.startsWith('omc_'); }
+
+localStorage.setItem = function(k, v){
+  _lsSet(k, v);
+  if(isAppKey(k)) fetch('/api/sync',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({key:k,value:v})}).catch(()=>{});
+};
+localStorage.removeItem = function(k){
+  _lsRem(k);
+  if(isAppKey(k)) fetch('/api/sync',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({key:k,value:''})}).catch(()=>{});
+};
+
+async function syncFromCloud(){
+  try{
+    const res = await fetch('/api/sync');
+    if(!res.ok) return;
+    const data = await res.json();
+    Object.entries(data).forEach(([k,v])=>{ if(v) _lsSet(k,v); else _lsRem(k); });
+  }catch(e){}
+}
+
 // ===== INIT =====
-document.addEventListener('DOMContentLoaded',function(){
+document.addEventListener('DOMContentLoaded',async function(){
+  await syncFromCloud();
   selRole('coach');
 });
 
