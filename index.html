@@ -2202,7 +2202,7 @@ document.addEventListener('DOMContentLoaded',async function(){
   await syncFromCloud();
   selRole('coach');
   // push to cloud every 10 seconds
-  setInterval(pushToCloud, 2000);
+  setInterval(pushToCloud, 5000);
   // push on page hide (tab switch, close)
   document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='hidden') pushToCloud(); });
 });
