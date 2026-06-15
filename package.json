@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/ohad4482/ohad-coaching#readme",
   "dependencies": {
-    "@neondatabase/serverless": "^1.1.0"
+    "@neondatabase/serverless": "^1.1.0",
+    "@vercel/blob": "^2.4.0"
   }
 }
