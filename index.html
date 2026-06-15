@@ -711,7 +711,9 @@ function buildCIHistHTML(){
     var ath=getAth(VIEW_ATH)||{};
     h+='<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">';
     h+='<span style="font-size:14px;font-weight:700;">שבוע '+ci.weekLabel+'</span>';
-    if(ath.phone)h+='<button class="btn btn-s btn-sm" onclick='waSendCI('+JSON.stringify(ci).replace(/'/g,"\'")+')'> ↗ וואטסאפ</button>';
+    var ciIdx=cis.length-1-cis.slice().reverse().indexOf(ci);
+    window._ciCache=window._ciCache||[];window._ciCache[ciIdx]=ci;
+    if(ath.phone)h+='<button class="btn btn-s btn-sm" onclick="waSendCI(window._ciCache['+ciIdx+'])"> ↗ וואטסאפ</button>';
     h+='</div>';
     if(ci.photos&&ci.photos.length){
       h+='<div class="photo-grid">';
