@@ -2250,10 +2250,16 @@ async function syncFromCloud(){
 document.addEventListener('DOMContentLoaded',async function(){
   await syncFromCloud();
   selRole('coach');
-  // push to cloud every 10 seconds
   setInterval(pushToCloud, 5000);
-  // push on page hide (tab switch, close)
-  document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='hidden') pushToCloud(); });
+  document.addEventListener('visibilitychange', async function(){
+    if(document.visibilityState==='hidden'){
+      pushToCloud();
+    } else {
+      await syncFromCloud();
+      if(ROLE==='coach' && typeof showCoachView==='function') showCoachView('dash');
+      if(ROLE==='athlete' && typeof showAthView==='function') showAthView('w');
+    }
+  });
 });
 
 </script>
