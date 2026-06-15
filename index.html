@@ -421,6 +421,10 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
     </div>
     <!-- AV: body -->
     <div id="av-b" class="ss">
+      <div class="card" style="margin-bottom:12px;">
+        <div class="ct" style="margin-bottom:8px;">טבלת מעקב גוף</div>
+        <div id="measureTable"><div class="empty">טוען...</div></div>
+      </div>
       <div class="tabs">
         <button class="tab on" id="abt1" onclick="showAbSub('w',this)">משקל</button>
         <button class="tab" id="abt2" onclick="showAbSub('st',this)">צעדים</button>
@@ -713,7 +717,7 @@ function buildCIHistHTML(){
     h+='<span style="font-size:14px;font-weight:700;">שבוע '+ci.weekLabel+'</span>';
     var ciIdx=cis.length-1-cis.slice().reverse().indexOf(ci);
     window._ciCache=window._ciCache||[];window._ciCache[ciIdx]=ci;
-    if(ath.phone)h+='<button class="btn btn-s btn-sm" onclick="waSendCI(window._ciCache['+ciIdx+'])"> ↗ וואטסאפ</button>';
+    if(ath.phone){h+='<button class="btn btn-s btn-sm" onclick="waSendCI(window._ciCache['+ciIdx+'])"> ↗ וואטסאפ</button>';}
     h+='</div>';
     if(ci.photos&&ci.photos.length){
       h+='<div class="photo-grid">';
@@ -2039,8 +2043,11 @@ function submitCI(){
   var key='mc3_'+ATH_ID+'_checkins';
   var cis=gsk(key)||[];
   var idx=cis.findIndex(function(c){return c.weekKey===wk;});
-  if(idx>=0)cis[idx]=ci;else cis.push(ci);
-  gsvk(key,cis);
+  // strip photos to keep cloud payload small (photos can be MBs as base64)
+  var ciCloud=Object.assign({},ci,{photos:[]});
+  var cisCloud=cis.map(function(c){return Object.assign({},c,{photos:[]});});
+  if(idx>=0)cisCloud[idx]=ciCloud;else cisCloud.push(ciCloud);
+  gsvk(key,cisCloud);
   alert('סיכום שבועי נשלח! 🎉');
   // clear form
   CI_PHOTOS=[];rendCIPhotos();
@@ -2129,7 +2136,7 @@ function showAthView(v){
   });
   if(v==='w'){rendWD();rendPlan();rendPS();}
   if(v==='n'){var ndl=document.getElementById('ndLabel');if(ndl)ndl.textContent=fmtD(ND);rendNS();rendND();rendFCT();filterF();buildWA();initMac();}
-  if(v==='b'){rendWS();rendWC();rendWE();rendSt();document.getElementById('wDate').value=td();document.getElementById('stDate').value=td();}
+  if(v==='b'){rendMeasureTable();rendWS();rendWC();rendWE();rendSt();document.getElementById('wDate').value=td();document.getElementById('stDate').value=td();}
   if(v==='ci'){initCI();rendCIHist();}
   if(v==='mtg'){rendAthMtg();}
 }
@@ -2507,7 +2514,7 @@ async function syncFromCloud(){
     const res=await fetch('/api/sync');
     if(!res.ok) return;
     const data=await res.json();
-    Object.entries(data).forEach(([k,v])=>{ if(v) localStorage.setItem(k,v); else localStorage.removeItem(k); });
+    Object.entries(data).forEach(([k,v])=>{ if(v) _origSet(k,v); else _origRem(k); });
   }catch(e){}
 }
 
