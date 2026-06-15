@@ -2229,6 +2229,12 @@ function getAllAppData(){
   return d;
 }
 
+async function pushKey(k,v){
+  try{
+    await fetch('/api/sync',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({key:k,value:v})});
+  }catch(e){}
+}
+
 async function pushToCloud(){
   try{
     const d=getAllAppData();
@@ -2236,6 +2242,18 @@ async function pushToCloud(){
     await fetch('/api/sync/bulk',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});
   }catch(e){}
 }
+
+// override localStorage to push immediately on every write
+const _origSet=localStorage.setItem.bind(localStorage);
+localStorage.setItem=function(k,v){
+  _origSet(k,v);
+  if(isAppKey(k)) pushKey(k,v);
+};
+const _origRem=localStorage.removeItem.bind(localStorage);
+localStorage.removeItem=function(k){
+  _origRem(k);
+  if(isAppKey(k)) pushKey(k,'');
+};
 
 async function syncFromCloud(){
   try{
