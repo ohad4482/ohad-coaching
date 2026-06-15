@@ -684,16 +684,34 @@ function showAthTab(tab,el){
   if(tab==='w'){c.innerHTML=buildWorkoutHTML();initWorkoutView();}
   else if(tab==='n'){c.innerHTML=buildNutritionHTML();initNutView();}
   else if(tab==='b'){c.innerHTML=buildBodyHTML();initBodyView();}
-  else if(tab==='ci'){c.innerHTML=buildCIHistHTML();}
+  else if(tab==='ci'){
+    c.innerHTML='<div class="empty" style="padding:2rem;">טוען...</div>';
+    syncFromCloud().then(function(){ c.innerHTML=buildCIHistHTML(); });
+  }
 }
 
+function waSendCI(ci){
+  var ath=getAth(VIEW_ATH)||{};
+  var msg='*סיכום שבועי - שבוע '+ci.weekLabel+'*\n\n';
+  if(ci.avgCals)msg+='🍽️ ממוצע קלוריות: '+ci.avgCals+'\n';
+  if(ci.avgProt)msg+='💪 ממוצע חלבון: '+ci.avgProt+'ג\n';
+  if(ci.avgSteps)msg+='👟 ממוצע צעדים: '+ci.avgSteps+'\n\n';
+  var scores=ci.scores||{};
+  var labels={nut:'תזונה',trn:'אימונים',slp:'שינה',rec:'התאוששות',hun:'רעב'};
+  Object.keys(labels).forEach(function(k){if(scores[k])msg+=labels[k]+': '+scores[k]+'/10\n';});
+  if(ci.progress)msg+='\n🏋️ '+ci.progress;
+  if(ci.text)msg+='\n\n'+ci.text;
+  window.open('https://wa.me/'+(ath.phone||'')+'?text='+encodeURIComponent(msg),'_blank');
+}
 function buildCIHistHTML(){
   var cis=gsk('mc3_'+VIEW_ATH+'_checkins')||[];
   if(!cis.length)return '<div class="empty">אין סיכומים שבועיים</div>';
   var h='';
   cis.slice().reverse().forEach(function(ci){
+    var ath=getAth(VIEW_ATH)||{};
     h+='<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">';
-    h+='<span style="font-size:14px;font-weight:700;">'+ci.weekLabel+'</span>';
+    h+='<span style="font-size:14px;font-weight:700;">שבוע '+ci.weekLabel+'</span>';
+    if(ath.phone)h+='<button class="btn btn-s btn-sm" onclick='waSendCI('+JSON.stringify(ci).replace(/'/g,"\'")+')'> ↗ וואטסאפ</button>';
     h+='</div>';
     if(ci.photos&&ci.photos.length){
       h+='<div class="photo-grid">';
@@ -725,7 +743,22 @@ function openAddAthlete(){
     '<div style="margin-bottom:8px;"><label>שם מלא</label><input type="text" id="mAthName" placeholder="שם המתאמן"></div>'+
     '<div style="margin-bottom:8px;"><label>שם משתמש</label><input type="text" id="mAthUser" placeholder="לכניסה לאפליקציה"></div>'+
     '<div style="margin-bottom:8px;"><label>סיסמה</label><input type="password" id="mAthPwd" placeholder="סיסמה"></div>'+
-    '<div style="margin-bottom:14px;"><label>טלפון (WhatsApp)</label><input type="tel" id="mAthPhone" placeholder="972501234567"></div>'+
+    '<div style="margin-bottom:8px;"><label>טלפון (WhatsApp)</label><input type="tel" id="mAthPhone" placeholder="972501234567"></div>'+
+    '<div class="r2" style="margin-bottom:8px;gap:8px;">'+
+      '<div><label>מין</label><select id="mAthGender"><option value="m">זכר</option><option value="f">נקבה</option></select></div>'+
+      '<div><label>גיל</label><input type="number" id="mAthAge" placeholder="25" min="15" max="80"></div>'+
+    '</div>'+
+    '<div class="r2" style="margin-bottom:8px;gap:8px;">'+
+      '<div><label>גובה (ס"מ)</label><input type="number" id="mAthHeight" placeholder="175" min="140" max="220"></div>'+
+      '<div><label>דרגת פעילות</label><select id="mAthActivity">'+
+        '<option value="1.2">ישיבה (1.2)</option>'+
+        '<option value="1.375">קלה (1.375)</option>'+
+        '<option value="1.55" selected>מתונה (1.55)</option>'+
+        '<option value="1.725">פעיל (1.725)</option>'+
+        '<option value="1.9">מאוד פעיל (1.9)</option>'+
+      '</select></div>'+
+    '</div>'+
+    '<div style="margin-bottom:14px;"><label>מטרה כללית</label><input type="text" id="mAthGoal" placeholder="ירידה במשקל, עלייה במסה..."></div>'+
     '<button class="btn btn-p" onclick="saveNewAthlete()">שמור מתאמן</button>');
 }
 function saveNewAthlete(){
@@ -737,7 +770,12 @@ function saveNewAthlete(){
   var aths=loadAths();
   if(aths.find(function(a){return a.username===user;})){alert('שם משתמש כבר קיים');return;}
   var id=nextAthId(aths);
-  aths.push({id:id,name:name,username:user,password:pwd,phone:phone});
+  var gender=document.getElementById('mAthGender').value;
+  var age=parseInt(document.getElementById('mAthAge').value)||25;
+  var height=parseInt(document.getElementById('mAthHeight').value)||170;
+  var activityLevel=parseFloat(document.getElementById('mAthActivity').value)||1.55;
+  var goal=document.getElementById('mAthGoal').value.trim();
+  aths.push({id:id,name:name,username:user,password:pwd,phone:phone,gender:gender,age:age,height:height,activityLevel:activityLevel,goal:goal});
   saveAths(aths);
   // Initialize fresh empty data for new athlete
   localStorage.setItem('mc3_'+id+'_checkins',JSON.stringify([]));
@@ -747,11 +785,23 @@ function saveNewAthlete(){
 }
 function openEditAthlete(){
   var ath=getAth(VIEW_ATH);if(!ath)return;
+  var acts=['1.2','1.375','1.55','1.725','1.9'];
+  var actLabels=['ישיבה (1.2)','קלה (1.375)','מתונה (1.55)','פעיל (1.725)','מאוד פעיל (1.9)'];
+  var actSel=acts.map(function(v,i){return '<option value="'+v+'"'+(String(ath.activityLevel||1.55)===v?' selected':'')+'>'+actLabels[i]+'</option>';}).join('');
   openModal('<div style="font-size:16px;font-weight:800;margin-bottom:14px;">✎ עריכת '+ath.name+'</div>'+
     '<div style="margin-bottom:8px;"><label>שם מלא</label><input type="text" id="mAthName" value="'+ath.name+'"></div>'+
     '<div style="margin-bottom:8px;"><label>שם משתמש</label><input type="text" id="mAthUser" value="'+ath.username+'"></div>'+
     '<div style="margin-bottom:8px;"><label>סיסמה חדשה (השאר ריק לשמור)</label><input type="password" id="mAthPwd" placeholder=""></div>'+
-    '<div style="margin-bottom:14px;"><label>טלפון (WhatsApp)</label><input type="tel" id="mAthPhone" value="'+ath.phone+'"></div>'+
+    '<div style="margin-bottom:8px;"><label>טלפון (WhatsApp)</label><input type="tel" id="mAthPhone" value="'+(ath.phone||'')+'"></div>'+
+    '<div class="r2" style="margin-bottom:8px;gap:8px;">'+
+      '<div><label>מין</label><select id="mAthGender"><option value="m"'+(ath.gender!=='f'?' selected':'')+'>זכר</option><option value="f"'+(ath.gender==='f'?' selected':'')+'>נקבה</option></select></div>'+
+      '<div><label>גיל</label><input type="number" id="mAthAge" value="'+(ath.age||'')+'" min="15" max="80"></div>'+
+    '</div>'+
+    '<div class="r2" style="margin-bottom:8px;gap:8px;">'+
+      '<div><label>גובה (ס"מ)</label><input type="number" id="mAthHeight" value="'+(ath.height||'')+'" min="140" max="220"></div>'+
+      '<div><label>דרגת פעילות</label><select id="mAthActivity">'+actSel+'</select></div>'+
+    '</div>'+
+    '<div style="margin-bottom:14px;"><label>מטרה כללית</label><input type="text" id="mAthGoal" value="'+(ath.goal||'')+'" placeholder="ירידה במשקל..."></div>'+
     '<button class="btn btn-p" onclick="saveEditAthlete()">שמור שינויים</button>');
 }
 function saveEditAthlete(){
@@ -766,6 +816,11 @@ function saveEditAthlete(){
   if(idx<0)return;
   aths[idx].name=name;aths[idx].username=user;aths[idx].phone=phone;
   if(pwd)aths[idx].password=pwd;
+  aths[idx].gender=document.getElementById('mAthGender').value;
+  aths[idx].age=parseInt(document.getElementById('mAthAge').value)||aths[idx].age||25;
+  aths[idx].height=parseInt(document.getElementById('mAthHeight').value)||aths[idx].height||170;
+  aths[idx].activityLevel=parseFloat(document.getElementById('mAthActivity').value)||aths[idx].activityLevel||1.55;
+  aths[idx].goal=document.getElementById('mAthGoal').value.trim();
   saveAths(aths);closeModal();
   document.getElementById('athDetailName').textContent=name;
 }
@@ -2198,13 +2253,195 @@ function buildNutritionHTML(){
         '<button class="btn btn-p" onclick="saveMac()">שמור יעדים</button></div>'+
     '</div>';
 }
+// Durnin-Womersley body fat calculation
+function durninConst(gender,age){
+  var t=gender==='f'?
+    [[20,[1.1549,0.0678]],[30,[1.1599,0.0717]],[40,[1.1423,0.0632]],[50,[1.1333,0.0612]],[999,[1.1339,0.0645]]]:
+    [[20,[1.1620,0.0630]],[30,[1.1631,0.0632]],[40,[1.1422,0.0544]],[50,[1.1620,0.0700]],[999,[1.1715,0.0779]]];
+  for(var i=0;i<t.length;i++){if(age<t[i][0])return t[i][1];}
+  return t[t.length-1][1];
+}
+function calcDurnin(gender,age,bic,tri,sub,sup){
+  var s=bic+tri+sub+sup;if(s<=0)return null;
+  var c=durninConst(gender,age);
+  var D=c[0]-c[1]*Math.log10(s);
+  return Math.round(((4.95/D)-4.50)*1000)/10;
+}
+function calcBMR(gender,w,h,age){
+  return Math.round(gender==='f'?(10*w+6.25*h-5*age-161):(10*w+6.25*h-5*age+5));
+}
+function loadMeasures(){
+  var id=ROLE==='coach'?VIEW_ATH:ATH_ID;
+  return gsk('mc3_'+id+'_measures')||[];
+}
+function saveMeasures(arr){
+  var id=ROLE==='coach'?VIEW_ATH:ATH_ID;
+  gsvk('mc3_'+id+'_measures',arr);
+}
+function onCaliperChange(){
+  var ath=getAth(ROLE==='coach'?VIEW_ATH:ATH_ID)||{};
+  var gender=ath.gender||'m';var age=ath.age||25;
+  var bic=parseFloat(document.getElementById('mCalBic').value)||0;
+  var tri=parseFloat(document.getElementById('mCalTri').value)||0;
+  var sub=parseFloat(document.getElementById('mCalSub').value)||0;
+  var sup=parseFloat(document.getElementById('mCalSup').value)||0;
+  var w=parseFloat(document.getElementById('mWeight').value)||0;
+  var fp=calcDurnin(gender,age,bic,tri,sub,sup);
+  var el=document.getElementById('caliperResult');
+  if(el&&fp!==null&&w>0){
+    var fm=Math.round(w*fp/100*10)/10;
+    var lm=Math.round((w-fm)*10)/10;
+    el.innerHTML='שומן: <strong style="color:var(--teal);">'+fp+'%</strong> | מסת שומן: <strong>'+fm+'kg</strong> | מסת רזה: <strong>'+lm+'kg</strong>';
+  } else if(el){el.innerHTML='';}
+}
+function saveMeasurement(){
+  var ath=getAth(ROLE==='coach'?VIEW_ATH:ATH_ID)||{};
+  var gender=ath.gender||'m';var age=ath.age||25;var height=ath.height||170;var actLevel=ath.activityLevel||1.55;
+  var date=document.getElementById('mDate').value;
+  var w=parseFloat(document.getElementById('mWeight').value)||0;
+  if(!date||!w){alert('נא להזין תאריך ומשקל');return;}
+  var bic=parseFloat(document.getElementById('mCalBic').value)||0;
+  var tri=parseFloat(document.getElementById('mCalTri').value)||0;
+  var sub=parseFloat(document.getElementById('mCalSub').value)||0;
+  var sup=parseFloat(document.getElementById('mCalSup').value)||0;
+  var fp=calcDurnin(gender,age,bic,tri,sub,sup);
+  var fm=fp&&w?Math.round(w*fp/100*10)/10:null;
+  var lm=fm&&w?Math.round((w-fm)*10)/10:null;
+  var bmi=height?Math.round(w/Math.pow(height/100,2)*10)/10:null;
+  var bmr=calcBMR(gender,w,height,age);
+  var tee=Math.round(bmr*actLevel);
+  var m={
+    date:date,weight:w,
+    calBic:bic||null,calTri:tri||null,calSub:sub||null,calSup:sup||null,
+    fatPct:fp,fatMass:fm,leanMass:lm,bmi:bmi,bmr:bmr,tee:tee,
+    cirChest:parseFloat(document.getElementById('mCirChest').value)||null,
+    cirWaist:parseFloat(document.getElementById('mCirWaist').value)||null,
+    cirNavel:parseFloat(document.getElementById('mCirNavel').value)||null,
+    cirArmR:parseFloat(document.getElementById('mCirArmR').value)||null,
+    cirArmL:parseFloat(document.getElementById('mCirArmL').value)||null,
+    cirLegR:parseFloat(document.getElementById('mCirLegR').value)||null,
+    cirLegL:parseFloat(document.getElementById('mCirLegL').value)||null,
+    cirGlutes:parseFloat(document.getElementById('mCirGlutes').value)||null
+  };
+  var arr=loadMeasures();
+  var idx=arr.findIndex(function(x){return x.date===date;});
+  if(idx>=0)arr[idx]=m;else{arr.push(m);arr.sort(function(a,b){return a.date.localeCompare(b.date);});}
+  saveMeasures(arr);
+  rendMeasureTable();
+  // collapse form
+  var f=document.getElementById('mForm');if(f)f.style.display='none';
+  var btn=document.getElementById('mFormToggle');if(btn)btn.textContent='+ הוסף מדידה חדשה';
+}
+function delMeasure(date){
+  if(!confirm('למחוק מדידה מ-'+date+'?'))return;
+  saveMeasures(loadMeasures().filter(function(x){return x.date!==date;}));
+  rendMeasureTable();
+}
+function rendMeasureTable(){
+  var el=document.getElementById('measureTable');if(!el)return;
+  var arr=loadMeasures();
+  if(!arr.length){el.innerHTML='<div class="empty">אין מדידות עדיין</div>';return;}
+  var cols=[
+    {k:'date',l:'תאריך',fmt:function(v){return v.slice(5).split('-').reverse().join('/');}},
+    {k:'weight',l:'משקל (kg)',d:true},
+    {k:'bmi',l:'BMI',d:true},
+    {k:'fatPct',l:'שומן %',d:true},
+    {k:'fatMass',l:'מסת שומן',d:true},
+    {k:'leanMass',l:'מסת רזה',d:true},
+    {k:'bmr',l:'BMR',d:true},
+    {k:'tee',l:'TEE',d:true},
+    {k:'cirChest',l:'חזה',d:true},
+    {k:'cirWaist',l:'בטן',d:true},
+    {k:'cirNavel',l:'טבור',d:true},
+    {k:'cirArmR',l:'יד ימין',d:true},
+    {k:'cirArmL',l:'יד שמאל',d:true},
+    {k:'cirLegR',l:'רגל ימין',d:true},
+    {k:'cirLegL',l:'רגל שמאל',d:true},
+    {k:'cirGlutes',l:'ישבן',d:true}
+  ];
+  var h='<div style="overflow-x:auto;-webkit-overflow-scrolling:touch;"><table style="border-collapse:collapse;font-size:11px;min-width:900px;width:100%;">';
+  h+='<thead><tr style="background:var(--surf2);">';
+  cols.forEach(function(c){h+='<th style="padding:6px 8px;text-align:center;white-space:nowrap;border-bottom:1px solid var(--bdr);color:var(--g1);">'+c.l+'</th>';});
+  h+='<th style="padding:6px 8px;border-bottom:1px solid var(--bdr);color:var(--g1);">Δ משקל</th>';
+  if(ROLE==='coach')h+='<th style="padding:6px 8px;border-bottom:1px solid var(--bdr);">מחק</th>';
+  h+='</tr></thead><tbody>';
+  arr.slice().reverse().forEach(function(m,i){
+    var prev=arr[arr.length-2-i];
+    var dw=prev&&m.weight&&prev.weight?Math.round((m.weight-prev.weight)*10)/10:null;
+    var dwColor=dw===null?'':dw<0?'var(--ok)':dw>0?'var(--warn)':'var(--g2)';
+    h+='<tr style="border-bottom:1px solid var(--bdr2);">';
+    cols.forEach(function(c){
+      var v=m[c.k];
+      h+='<td style="padding:5px 8px;text-align:center;white-space:nowrap;color:'+(v!==null&&v!==undefined?'var(--w)':'var(--g2)')+';">'+(v!==null&&v!==undefined?v:'—')+'</td>';
+    });
+    h+='<td style="padding:5px 8px;text-align:center;font-weight:700;color:'+dwColor+';">'+(dw!==null?(dw>0?'+':'')+dw+'kg':'—')+'</td>';
+    if(ROLE==='coach')h+='<td style="padding:5px 8px;text-align:center;"><button onclick="delMeasure(\''+m.date+'\')" style="background:none;border:none;color:var(--g2);cursor:pointer;font-size:14px;">🗑</button></td>';
+    h+='</tr>';
+  });
+  h+='</tbody></table></div>';
+  el.innerHTML=h;
+}
 function buildBodyHTML(){
-  return '<div class="r4" id="wstats"></div>'+
+  var isCoach=ROLE==='coach';
+  var formHTML='';
+  if(isCoach){
+    formHTML='<div class="card" style="margin-bottom:12px;">'+
+      '<button id="mFormToggle" class="btn btn-p btn-sm" onclick="toggleMeasureForm()" style="width:100%">+ הוסף מדידה חדשה</button>'+
+      '<div id="mForm" style="display:none;margin-top:14px;">'+
+        '<div class="r2" style="gap:8px;margin-bottom:8px;">'+
+          '<div><label>תאריך</label><input type="date" id="mDate"></div>'+
+          '<div><label>משקל (kg)</label><input type="number" id="mWeight" step="0.1" placeholder="80.5" oninput="onCaliperChange()"></div>'+
+        '</div>'+
+        '<div class="ct" style="margin-bottom:6px;">קליפר (מ"מ)</div>'+
+        '<div class="r2" style="gap:8px;margin-bottom:4px;">'+
+          '<div><label>יד קדמית (bicep)</label><input type="number" id="mCalBic" step="0.1" placeholder="5" oninput="onCaliperChange()"></div>'+
+          '<div><label>יד אחורית (tricep)</label><input type="number" id="mCalTri" step="0.1" placeholder="12" oninput="onCaliperChange()"></div>'+
+        '</div>'+
+        '<div class="r2" style="gap:8px;margin-bottom:6px;">'+
+          '<div><label>שכמה (subscap)</label><input type="number" id="mCalSub" step="0.1" placeholder="15" oninput="onCaliperChange()"></div>'+
+          '<div><label>בטן (suprailiac)</label><input type="number" id="mCalSup" step="0.1" placeholder="18" oninput="onCaliperChange()"></div>'+
+        '</div>'+
+        '<div id="caliperResult" style="font-size:12px;color:var(--g1);padding:6px 0 10px;min-height:20px;"></div>'+
+        '<div class="ct" style="margin-bottom:6px;">היקפים (ס"מ)</div>'+
+        '<div class="r2" style="gap:8px;margin-bottom:4px;">'+
+          '<div><label>חזה</label><input type="number" id="mCirChest" step="0.5" placeholder="100"></div>'+
+          '<div><label>בטן</label><input type="number" id="mCirWaist" step="0.5" placeholder="82"></div>'+
+        '</div>'+
+        '<div class="r2" style="gap:8px;margin-bottom:4px;">'+
+          '<div><label>טבור</label><input type="number" id="mCirNavel" step="0.5" placeholder="85"></div>'+
+          '<div><label>ישבן</label><input type="number" id="mCirGlutes" step="0.5" placeholder="95"></div>'+
+        '</div>'+
+        '<div class="r2" style="gap:8px;margin-bottom:4px;">'+
+          '<div><label>יד ימין</label><input type="number" id="mCirArmR" step="0.5" placeholder="35"></div>'+
+          '<div><label>יד שמאל</label><input type="number" id="mCirArmL" step="0.5" placeholder="34"></div>'+
+        '</div>'+
+        '<div class="r2" style="gap:8px;margin-bottom:12px;">'+
+          '<div><label>רגל ימין</label><input type="number" id="mCirLegR" step="0.5" placeholder="57"></div>'+
+          '<div><label>רגל שמאל</label><input type="number" id="mCirLegL" step="0.5" placeholder="56"></div>'+
+        '</div>'+
+        '<button class="btn btn-p" onclick="saveMeasurement()" style="width:100%">💾 שמור מדידה</button>'+
+      '</div>'+
+    '</div>';
+  }
+  return formHTML+
+    '<div class="card"><div class="ct">טבלת מעקב חודשית</div><div id="measureTable"><div class="empty">טוען...</div></div></div>'+
+    '<div style="margin-top:12px;"><div class="r4" id="wstats"></div>'+
     '<div class="card"><div class="ct">גרף משקל</div><div class="cw"><canvas id="wChart"></canvas></div></div>'+
     '<div id="wEntries"></div>'+
     '<div class="divider"></div>'+
     '<div class="r3" id="stStats" style="margin-bottom:10px;"></div>'+
-    '<div class="card"><div class="ct">30 ימים אחרונים - צעדים</div><div class="cw"><canvas id="stChart"></canvas></div></div>';
+    '<div class="card"><div class="ct">30 ימים אחרונים - צעדים</div><div class="cw"><canvas id="stChart"></canvas></div></div></div>';
+}
+function toggleMeasureForm(){
+  var f=document.getElementById('mForm');
+  var btn=document.getElementById('mFormToggle');
+  if(!f||!btn)return;
+  var open=f.style.display!=='none';
+  f.style.display=open?'none':'block';
+  btn.textContent=open?'+ הוסף מדידה חדשה':'✕ סגור';
+  if(!open){
+    document.getElementById('mDate').value=new Date().toISOString().slice(0,10);
+  }
 }
 function coachAthSub(id,el){
   var parent=el.closest('.tabs');
@@ -2223,7 +2460,7 @@ function initWorkoutView(){
   updDS();rendMT();renderEL();rendPlan();
 }
 function initNutView(){rendNS();rendND();rendFCT();filterF();initMac();}
-function initBodyView(){rendWS();rendWC();rendWE();rendSt();}
+function initBodyView(){rendMeasureTable();rendWS();rendWC();rendWE();rendSt();}
 
 // ===== CLOUD SYNC =====
 function isAppKey(k){ return k.startsWith('mc3_') || k.startsWith('omc_'); }
