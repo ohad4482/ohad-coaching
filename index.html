@@ -1242,10 +1242,14 @@ function rendFCT(){
 function setFC(k){FCAT=k;SFD=null;var el=document.getElementById('fQtyBox');if(el)el.style.display='none';rendFCT();filterF();}
 var _fSearchTimer=null;
 var _fSearchCache={};
+var _fSearchActive=false;
+var _fSearchQ='';
 function filterF(){
   var q=(document.getElementById('fSearch')?document.getElementById('fSearch').value:'').trim();
+  _fSearchQ=q;
   var el=document.getElementById('fList');if(!el)return;
   if(!q){
+    if(_fSearchActive)return; // don't clear while search in progress
     var list=FDB;
     if(FCAT!=='הכל')list=list.filter(function(f){return f.cat===FCAT;});
     el.innerHTML=list.slice(0,15).map(function(f){
@@ -1258,15 +1262,21 @@ function filterF(){
   if(_fSearchTimer)clearTimeout(_fSearchTimer);
   _fSearchTimer=setTimeout(function(){
     if(_fSearchCache[q]){return renderFList(_fSearchCache[q],q);}
-    el.innerHTML='<div class="empty" style="padding:1rem;">מחפש...</div>';
+    _fSearchActive=true;
+    var el2=document.getElementById('fList');if(el2)el2.innerHTML='<div class="empty" style="padding:1rem;">מחפש...</div>';
     fetch('/api/food-search?q='+encodeURIComponent(q))
       .then(function(r){return r.json();})
       .then(function(d){
+        _fSearchActive=false;
         _fSearchCache[q]=d.foods||[];
-        renderFList(_fSearchCache[q],q);
+        // only render if user hasn't changed the query
+        if(_fSearchQ===q) renderFList(_fSearchCache[q],q);
       }).catch(function(){
-        var local=FDB.filter(function(f){return f.n.toLowerCase().indexOf(q.toLowerCase())>=0;});
-        renderFList(local,q);
+        _fSearchActive=false;
+        if(_fSearchQ===q){
+          var local=FDB.filter(function(f){return f.n.toLowerCase().indexOf(q.toLowerCase())>=0;});
+          renderFList(local,q);
+        }
       });
   },400);
 }
