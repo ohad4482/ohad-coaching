@@ -1240,17 +1240,56 @@ function rendFCT(){
   el.innerHTML=FCATS.map(function(c){return '<button class="chip'+(c.k===FCAT?' on':'')+'" data-k="'+c.k+'" onclick="setFC(this.dataset.k)">'+c.v+'</button>';}).join('');
 }
 function setFC(k){FCAT=k;SFD=null;var el=document.getElementById('fQtyBox');if(el)el.style.display='none';rendFCT();filterF();}
+var _fSearchTimer=null;
+var _fSearchCache={};
 function filterF(){
-  var q=(document.getElementById('fSearch')?document.getElementById('fSearch').value:'').toLowerCase();
-  var list=FDB;
-  if(FCAT!=='הכל')list=list.filter(function(f){return f.cat===FCAT;});
-  if(q)list=list.filter(function(f){return f.n.toLowerCase().indexOf(q)>=0;});
+  var q=(document.getElementById('fSearch')?document.getElementById('fSearch').value:'').trim();
   var el=document.getElementById('fList');if(!el)return;
-  el.innerHTML=list.slice(0,15).map(function(f){
-    return '<div class="food-li'+(SFD&&SFD.n===f.n?' on':'')+'" data-n="'+f.n.replace(/"/g,'&quot;')+'" onclick="pickF(this.dataset.n)">'+
+  if(!q){
+    var list=FDB;
+    if(FCAT!=='הכל')list=list.filter(function(f){return f.cat===FCAT;});
+    el.innerHTML=list.slice(0,15).map(function(f){
+      return '<div class="food-li'+(SFD&&SFD.n===f.n?' on':'')+'" data-n="'+f.n.replace(/"/g,'&quot;')+'" onclick="pickF(this.dataset.n)">'+
+        '<div class="food-n">'+f.n+'</div>'+
+        '<div class="food-m">'+f.c+'קל · C'+f.p+'ג · פ'+f.k+'ג</div></div>';
+    }).join('');
+    return;
+  }
+  if(_fSearchTimer)clearTimeout(_fSearchTimer);
+  _fSearchTimer=setTimeout(function(){
+    if(_fSearchCache[q]){return renderFList(_fSearchCache[q],q);}
+    el.innerHTML='<div class="empty" style="padding:1rem;">מחפש...</div>';
+    fetch('/api/food-search?q='+encodeURIComponent(q))
+      .then(function(r){return r.json();})
+      .then(function(d){
+        _fSearchCache[q]=d.foods||[];
+        renderFList(_fSearchCache[q],q);
+      }).catch(function(){
+        var local=FDB.filter(function(f){return f.n.toLowerCase().indexOf(q.toLowerCase())>=0;});
+        renderFList(local,q);
+      });
+  },400);
+}
+function renderFList(list,q){
+  var el=document.getElementById('fList');if(!el)return;
+  if(!list.length){el.innerHTML='<div class="empty" style="padding:1rem;">לא נמצא</div>';return;}
+  el.innerHTML=list.slice(0,20).map(function(f){
+    return '<div class="food-li'+(SFD&&SFD.n===f.n?' on':'')+'" data-n="'+f.n.replace(/"/g,'&quot;')+'" onclick="pickFObj(this.dataset.n)">'+
       '<div class="food-n">'+f.n+'</div>'+
-      '<div class="food-m">'+f.c+'קל · C'+f.p+'ג · פ'+f.k+'ג</div></div>';
+      '<div class="food-m">'+f.c+'קל · C'+f.p+'ג · פ'+f.k+'ג · ש'+f.f+'ג</div></div>';
   }).join('');
+  window._fLastList=list;
+}
+function pickFObj(name){
+  var list=window._fLastList||FDB;
+  var found=list.find(function(f){return f.n===name;});
+  if(!found)found=FDB.find(function(f){return f.n===name;});
+  if(!found)return;
+  SFD=found;
+  var el=document.getElementById('fQtyBox');if(el)el.style.display='block';
+  var en=document.getElementById('fQtyName');if(en)en.textContent=SFD.n;
+  var eq=document.getElementById('fQty');if(eq)eq.value=100;
+  updFQ();
 }
 function pickF(name){
   SFD=FDB.find(function(f){return f.n===name;});if(!SFD)return;
