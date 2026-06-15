@@ -263,19 +263,31 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
     </div>
     <!-- CV: meetings -->
     <div id="cv-mtg" class="ss">
-      <div class="nav-row">
-        <button onclick="chCalM(-1)">◀</button>
-        <span id="calTitle"></span>
-        <button onclick="chCalM(1)">▶</button>
+      <div class="tabs" style="margin-bottom:12px;">
+        <button class="tab on" id="cmtg1" onclick="showCoachMtgSub('cal',this)">📅 פגישות</button>
+        <button class="tab" id="cmtg2" onclick="showCoachMtgSub('tips',this)">📚 מדריכים</button>
       </div>
-      <div class="cal-wrap"><div class="cal-head" id="calHead"></div><div id="calBody"></div></div>
-      <button class="btn btn-p" style="margin-bottom:10px;" onclick="openAddMeeting()">+ קבע פגישה</button>
-      <div id="mtgList"></div>
-      <div class="card" style="margin-top:10px;">
-        <div class="ct">תזכורות שבועיות</div>
-        <div style="font-size:12px;color:var(--g1);margin-bottom:10px;">שלח תזכורת לכל המתאמנים לסיכום שבועי (מידי ראשון בבוקר)</div>
-        <button class="btn btn-s" onclick="sendWeeklyReminders()">📱 צור קישורי WhatsApp לכל המתאמנים</button>
-        <div id="weeklyReminderLinks" style="margin-top:8px;"></div>
+      <div id="cmtg-cal" class="ss on">
+        <div class="nav-row"><button onclick="chCalM(-1)">◀</button><span id="calTitle"></span><button onclick="chCalM(1)">▶</button></div>
+        <div class="cal-wrap"><div class="cal-head" id="calHead"></div><div id="calBody"></div></div>
+        <button class="btn btn-p" style="margin-bottom:10px;" onclick="openAddMeeting()">+ קבע פגישה</button>
+        <div id="mtgList"></div>
+        <div class="card" style="margin-top:10px;">
+          <div class="ct">תזכורות שבועיות</div>
+          <div style="font-size:12px;color:var(--g1);margin-bottom:10px;">שלח תזכורת לכל המתאמנים לסיכום שבועי</div>
+          <button class="btn btn-s" onclick="sendWeeklyReminders()">📱 צור קישורי WhatsApp לכל המתאמנים</button>
+          <div id="weeklyReminderLinks" style="margin-top:8px;"></div>
+        </div>
+      </div>
+      <div id="cmtg-tips" class="ss">
+        <div class="card" style="margin-bottom:12px;">
+          <div class="ct" style="margin-bottom:8px;">העלה מדריך חדש</div>
+          <div style="margin-bottom:8px;"><label>שם המדריך</label><input type="text" id="tipName" placeholder="מדריך תזונה / טיפים לשינה..."></div>
+          <div style="margin-bottom:8px;"><label>קטגוריה</label><select id="tipCat"><option value="תזונה">תזונה</option><option value="אימון">אימון</option><option value="מתכונים">מתכונים</option><option value="כללי">כללי</option></select></div>
+          <div style="margin-bottom:10px;"><label>קובץ PDF / תמונה</label><input type="file" id="tipFile" accept=".pdf,image/*" style="width:100%;font-size:12px;"></div>
+          <button class="btn btn-p" onclick="saveTip()" style="width:100%">העלה מדריך</button>
+        </div>
+        <div id="coachTipsList"></div>
       </div>
     </div>
     <!-- CV: athletes list -->
@@ -309,6 +321,10 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
     <button class="ibtn" onclick="doLogout()" style="font-size:12px;">⏻</button>
   </div>
   <div class="content" id="athContent">
+    <!-- AV: home -->
+    <div id="av-home" class="ss on">
+      <div id="homeContent"></div>
+    </div>
     <!-- AV: workout -->
     <div id="av-w" class="ss on">
       <div class="tabs">
@@ -410,6 +426,9 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
           <div id="athNutPlanContent"></div>
         </div>
       </div>
+      <div id="an-plan" class="ss">
+        <div id="athNutPlanView"><div class="empty">אין תפריט מהמאמן עדיין</div></div>
+      </div>
       <div id="an-wa" class="ss">
         <div class="card">
           <div class="ct">שלח סיכום יומי למאמן</div>
@@ -497,21 +516,35 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
         <div id="ciHistList"></div>
       </div>
     </div>
-    <!-- AV: meetings -->
+    <!-- AV: meetings + tips -->
     <div id="av-mtg" class="ss">
-      <div style="font-size:15px;font-weight:700;margin-bottom:12px;">הפגישות שלי 📅</div>
-      <div id="athMtgList"></div>
+      <div class="tabs" style="margin-bottom:12px;">
+        <button class="tab on" id="amtg1" onclick="showMtgSub('mtg',this)">📅 פגישות</button>
+        <button class="tab" id="amtg2" onclick="showMtgSub('tips',this)">📚 מדריכים</button>
+      </div>
+      <div id="amtg-mtg" class="ss on"><div id="athMtgList"></div></div>
+      <div id="amtg-tips" class="ss"><div id="athTipsList"><div class="empty">אין מדריכים עדיין</div></div></div>
     </div>
   </div>
   <nav class="bottom-nav">
-    <button class="nb on" id="anb-w" onclick="showAthView('w')"><span class="ni"><img src="data:image/png;base64,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" width="26" height="26"></span>אימון</button>
+    <button class="nb on" id="anb-home" onclick="showAthView('home')"><span class="ni"><svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>בית</button>
+    <button class="nb" id="anb-w" onclick="showAthView('w')"><span class="ni"><img src="data:image/png;base64,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" width="26" height="26"></span>אימון</button>
     <button class="nb" id="anb-n" onclick="showAthView('n')"><span class="ni"><img src="data:image/png;base64,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" width="26" height="26"></span>תזונה</button>
     <button class="nb" id="anb-b" onclick="showAthView('b')"><span class="ni"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJYAAACXCAYAAAD3XaJHAAAACXBIWXMAAAsSAAALEgHS3X78AAASNklEQVR4nO1dzXHcuBL+/GrvcgbGi0Dzqt5d3CNP1kZgbgBTowyWjmDFYgBvHMHKpzkulcEogoUykCLwOxC0qFE3iJ8GyLH5VU3Jbg4bGPJDo9FoAO++ffuGFSuk8a+5K7Dix8RKrBVJsBJrRRKsxFqRBCuxViTBSqwVSbASa0US/DJ3BeZE2TYKwPgDAMXJ1xSADyeyRwD6RNaZv3r4HLa70+/8NHj3MwRIDYE2o48CcJmp+Af0RDsOn5+BcD8kscq22aC3PAV6Ip1anLnxjN7CdQC6w3Z3nLU2CfBDEKtsm/cArtET6RrAxawV8sdAtDv0RNOz1kYAZ0ss071dA6iQr1vLhQcAewB350qysyLWyDLdQJ5M9+avBu+YDyhO/q/w4vxfidWox1mS7CyIVbZNgd4yfYpU9Yzege7wQqDjYbt7itT7BqbOynwK9L5ebBf9FcD+sN3dRepJjkUTq2ybCnHW6QEvTvLso7HR6LQwn9Df9Yjeit2maBQSWCSxDKFq+I/mHvHaCV7kQx9guvYCL4MO39/7DOAWCyTYoogVSKhH9ETan/uwfRQmqeBnzRZHsMUQy/gkfzt+/Rl9V3D2ZOJgus3KfFwb2ufDdlenqZEfljSl49LS7tGTaZ+4LrPD+IM1gFpw8JINi7FYAFC2DVeZLwDquZ3vuWF8shvzoUaYvx62uy5rpRgsyWIBvb90avYXY97nhvGf6rJt9gD+mbk6ViyNWBoZ5/WMs/zefDajS4PcFUe8dOVP5v9AohgZXoKxr7AUawUsk1inkesiRuEoNabAS8BSIlg5BhttL9sG6ONpT+hDIU/oCddFlLeZ/sq8WCKxgmD8j2G4rsxHenolFEPo4Ht9DOGGvK4OLzlcnYM+ypreE7LZcA7EspLDxL5ucX4ZDUDf7X8AQbjDdqcs91EWaxHxqwFLS03WlNBYIw5POE9S2TDl31HXFxXPOweLBfQttPO8xxeDHwS8dsBdUIz+LeG/TZW9eIu1KGIdtjttuoJTsC34sN0dmXtOMfgzwwiuM/d3ntV0wsjnG/4quPt9U8SiiLtarAk84O082Qb9fKDPPffmniHPPGuLNuV15r+v6n4yUv2DuF1zek2IhMJqsSZAPaApn0ODmLQ9bHe3EhWShplB0GXbHEETy2Z9yGextDnTKGKNMjqH1S8SoPRM6T4C+HgiUxKV4SbHD9vdOwH13O/SlnsKSli2TRdZl3HZR0RmrAYTq2ybG/STpDlGZGriOtVal7YyhwJJrMAXKhWzu0I/2f1n2TYN+jla7242KNxg5qr+RL5h/hRJNCU01mbJUIRsKtBZyFeDxQ5ANxHuIeFNrLJtbjFD+oZxeElY/AvvB5IZlMXSuSsxgUvwoR4WXsQyI5KdbyFCUBPXHwjZ0ufUQog1xzTVZdk2tc8Nvj7WjeXakOCfCtrhOhWmWCRM90K5Et3ErZ/la/MdCnxvNPjUTvAl1jUhewRQLSBlI9nIMBFCRoRInZtmLNMeby3jRdk2het7du4KLS3sbgGkAuiR4ZJXSEuOCMUwSomm4NwD+PhYnNLOQ0dKaEpoiVTPDUXIFpH6YgzFM3HJeTDkQyxu5LWIqQTLyFDlrIcHlj4ipHon53ft7GMdtrsnZrJXuerIACpnnpxnHKUlK7z8Biol+b9UQWXbaLwlwjhFefg3N0+pCNmpvllgiVs5Txv5Ou/3eOvUKU8dKaHxlljXpkEoyKYlD0l6Y5ChACY9mQr6dgL1kgDnPiQjFtXyCk8dKdHh7cu9xDKc+DfpyQR0hnq4QFFCn6kd38g7xdglRbf13BWIwdwjwhEUIfMaWPgSSxOyJViDAXruCkRgESNCg+gMVd+uUFPCsm3UElrbYbvrHLNJTzG8VColWYP+3ZSjX5i/7+Hf4Kgy5kJ0Tr0vsWxDeu2pKxWokeHgOI/Tkp8ik+O6qS9Y0pOpAYSOqIs0KD9Q+yjwIpYl5GBb7JAbNfoXecTMe63b0pOB72k9A+lsqdfZYAk1aB89IYl+VMhhMQ78Oe1EM5oKWwSpDKJDDUBYop8mZEWAnhXLBDeH6eW8SxFrMRZrRTSod+k9Yg0h1rllEazwQ0HIsuS8k4XYUodXnBWiQw1AALEsuVfKV9eKRYLqfbSvktBNQahcnaXmPa1whKXX0b66QolFmUYVqGvFcqAoYUiGcCixNCFbLdb5g3qHVO80idCV0JqQqUBdUTDR6+GjwC9uHe+ed8x1Hs3J2YkK/Ah6OOfniJdzDHNn54o47kA4sWZd0j7a9/wa7kl7r3bPK9vmGS8nWnTC9VPol0tdw/25XJi6XcGs3Szb5iv6xSp7yfpZUBAyHaIoaJ93yykS/0m564kpt0aao9tuYglm5tlSrBR/RN8AamG9r2B2vzm1qEHboQf5WJYXkCQCX7aNMrup/I00K4EvIbPYNtX2Ax8A/FG2jS7bhlrbKQWqmw4yFDF7kFJOXRGhj4TZ1eaI9EvLP5iNcoNgur/Ue1p8APBX2Tb7kI06bLCEGoL8vJj9saiXLfZjPbuV4UzlwfnlcvMHR5rzy24Qbrmqiev3eKkjVb8NXuo35Zd9ArAp26YSdD0UJQx1D6SJJRJyMKTqMD0H6XPiaDfSf42eRG8WXpRtswl8WRUhezbl3DmM8Mb12+Dl5C+uEVyi32KoECJXQciCQg1AXFfoulbOC46k+grg34ft7jokbGDuqZjL3j6MIQJlZW4O293eN2xw2O6Oh+3uBv3z/Az+BV+gJ5dEgxYLNQBxxOoImUTIoYM91vOrIZSOKcTcT6WDFAHquHuiYmWH7e7JjMg24FNXpMhF3a9DlUlbrKi9EsxOgRypHgAo4ZgT9eJDBgkFIbuXCnAetjt92O4K8FsYXQCIdegVIdOhyoKJJb2LnvF7OEf9y2G72ySIRJO/ISAFiPp+56ljEsZ6/c5cjg2ZUL3NLF0h0AfuTlH4KjEtbc9c/nLY7ipfnS4QTAESi/9MwUThOXJ9DIlzWXoZ7atrQCyxqIJVgJ5b0KOfB9h3EUwFibBJsnk+Qy5uAeVtQJdIfj9mtBlLrOj0GUtg8RnAdYaJWMopXnymhhk1UnX/AP/GWBAyqjdyRiyxuECfD2pOvoTV1QtHBToUceNptajv6pAKDYglVkfInLcIslirh4zHlVANIXe6ShBMw6Oe0wX84nHUM4jyEVNYLJ+N+ytGntOvWvxJWhO4BWO1PHQoQhbVuKKIJRByqAjZQ67NcgX3J80yIU/B+KCU1br0+H3im8BJnLAatHG/ZRokVxcI8Kt+O089VAPLOQDYM/Ji6sZUx9RJECt0zrBg5FHTIJ6g6kA1lCl0jrqTwPhaVL1d/CzF6JzVxwLoh6oc7qNaykPmPG/qwYc8UOqei8yHRFEN0sVqUt+JCjUA6SxW6A/q4qriDhOhJg9ECFDXMfIqQFcoqDpcOExPUdd1ZF1EiEW2Vof7sk2DMKBGTc+BaThP6FN5TvFJOtPTAu7ZqYn7qOvR70GCWJoSBnYDpC5pmFZMZTHE+Hd7Rp4ldGJxIaaInSSOF00sS3Q8V0sNQc3Ig0ekxtJRvknOmFzICD3kBLJJSFgswPMHzXm+jSXafy+Q4rsnZBcxizQ84WVpLL2Kjq2IFLG8HPiZT1yvGblE/IyLgnNlzg0uq0HHKpYiVkfIFtcVGkeaCjE8Siy5t0TBo5aWeYDyG22NmAz5SFQkpcUKSfFNTcYKtE9RC5axt5Q9B2zdo/L8vjOkiMWl+NqIMscZzpQj/Si5N4LpRr4Ql65S7noY6C8pQtZFVgWAHLE0I7cRhbqniK0IB8vc5D5BcTUjTzlC5OY9tec9y7FYlsory20dIbtKGFDk5s3EJ72Fl5a5gtLN7nZsOYpZZGAlZbEA+kcoy/c7Ru69GMARBSH7mnBukhoMXKZoOEbn6UHrgL1bE19AMYYksUJCDlRAsZKqkENdukRlAXwUP4UfyXWxtpGuooRS6eCSxKJM6FTrpH74VaIAatZM0cz5+hUhe5yIFypCJhJqAGSJpQnZVMiB829yToOcNUx8LGRQkjTXPzWxrCEHi5P7aT2QwBlcI5walFDvpYurygtSd4XAtE/BPYA6vCrOUKkU50iXMbErKv3oi8OghOpNlmexLD9ETdzHZQVIW60lDP8B2dSg2lMOwEp6MZ9T0mIB/iGHAbWnPASakBWC+l10P0o59cZaUVbni0MZXC+yWGJRVquYuslMqaS2WtQI9EPCvPSKkHWC+mtG7hLwVZRQMqYnTayQkMOA2lPui46RV0L6v8OM1KTy6Sn9BWhr5ZpTpqh7Y+p0CmliaULmdJZhaqtlWiM1OZxiBFoRsqB8egaxA56koQYgD7F8NjKrPeW+2CfWb7MmXNm++ivQjfXeY6Et1YuIBotzdIWA47B+wmoVYVV6pb+z6Fex+g1qRi412c3przx0UMTXvhWxQZRYpruJPcuw9pT7Ipl+Y01CR2ou+mvQUXZn/ZJnEtogbbGAOAd+sFqUI3klkd6b2CrWnnJnmNgTF2X30a8Y+aK7QkAmXlRzcqGINqs/VKGENZnALeiR5mdP/VxC4KKdd4AmlhcZjC9ErSwO2QaR0r8HbxW99Y+OkaNQ++oj9G/Ab6fp67tR70I01ADk6wqdQg4nuIHMNogcak4eoH8PGWvCgc0CCbA0BSETT3ZMQSyykr6jroltEKNHWMYqUnGtC3iEBszmIpTD/giBelr03wcuAkkeagASEEtw73SAXwAqEn4AbxU/uuif2J8+xJpQ+qWzP6jeQwfqYpHCYgFCWyeaFxOab+Sqv47QfwO6C/wqFGW/AT0g8AmGfkeuUAOQjlhRIYcxjLmnUmYvzUgsCmZ3Zsp5vXSwWhTpnxm5F4zD/gdzuQpUqyhhij1fUxFLE7KYPHbuRf0hlB9fecptG7fdCjnse0YeMyCgnlXwmYQ25CSWClVmWhR3xEf0MbbmRVHhjcJyG3UtZPj/BmXb3IL2hWIHBFkcdyBvVxh7lmENOmJ+CZl5ODJfy/J9qvW7nKRqhZld2DGXq0j9BSHTEfpYpCIWF3II7rbMA62Yy59CApsnIFuuZ511TAVMWVwjaQR8Icpi6UidJJIQy/IAYrusDnyX+GfIkWoj3VyXkHxRBPDqyGLuFLRaoJhs+76msliA0FmGpzCnXnELK/ehVjHl7nYOZdtI9Yz4LjDZQQEcUhJLEzKp1l+AHs3EnI/MTc7qWB02OByuXgntgEg++1THy6QkFvUwJEIDg79VwE4u326R8tFsS847QvbRZ+rKfLcDT6rPgunMBSFLEmoA0hKLMrFKSrlpxZzDfgHgL9cAqiXlZW+5jXvhTkQwXe8RPKm+mDOgpZAt1ACkJVZHyGJDDq8wcT4y0AdQO5sVMcN7LsLNksQQm4vYs7G1sm3eGyL/Df6ghRTnYFO9hRYu4ztyWyzxrbgdyHUF4J+ybW7HBCvbZlO2zR2A/zH3NQ7+Vc3IPwE4jjNeDaEq9FaCIzKQ7nB1Rch0gnIAAO++ffuWSjfKtqGU/yboN4zLqsBnWfriEcDGZSRWts0edBJeCFKRKuu7ANJaLIAOOYharAHGchVMmT7wPeTcFv7wwe8JScU9c52iPCA9sTQhU6kKM37PBvS8nwueARQ+w/vRCDWUXI8A/iO5czMBLtRwls47QI86VMoCD9vd02G7uwbwG/ys1z367s/7YZsyN+BnBSg8A/gcWqYnCkIWfSahDb+kVI7wswyjYXyHO+N73YAf1n9Fn+rSCZR5YzITavSb9FL+3iP6MMZtxkM/s80RDkhNrA5vR0ASzrUzTBezB95O26SIOpuRZGXK2+D1Sz1mPkF2ANWYk1rJOSwWyrYpcp1UP0buMmc+jGoMRciSEjypjzV3xsCK76AC013KAlM778A8Z+asMLBkbZyvxTJIOme4YhLZQw1AHmJ1hExlKHdFD6p3SBpqAOazWGtXmA+KkOnUheYgFmVys4YcfnIoQpZ8tJqDWJoSJtyteMVrUL1D8lhacmJZUk+iVwuvsMOsXKJ6hy512akDpAO+4u15eh9NPpTEmsAVb1GAz/tK3hXmItYd6IMaPzLyFengcs5ONHL4WLYd9FbkxTPyHH6Vh1gG1xA8aHFFEKpcB3RmI9YoIW61XPkxJBMmSUOmkDTnnYMJNdygJ9oa00qHB/QpQ/vc6TqzEGvFj4+cPtaKnwgrsVYkwUqsFUmwEmtFEqzEWpEEK7FWJMH/AXPVkaAOZWyoAAAAAElFTkSuQmCC" width="26" height="26"></span>גוף</button>
     <button class="nb" id="anb-ci" onclick="showAthView('ci')"><span class="ni"><img src="data:image/png;base64,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" width="26" height="26"></span>סיכום</button>
-    <button class="nb" id="anb-mtg" onclick="showAthView('mtg')"><span class="ni"><img src="data:image/png;base64,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" width="26" height="26"></span>פגישות</button>
+    <button class="nb" id="anb-mtg" onclick="showAthView('mtg')"><span class="ni"><svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>פגישות</button>
   </nav>
 </div>
 
+<!-- ===== REST TIMER ===== -->
+<div id="restTimer" style="display:none;position:fixed;bottom:76px;left:50%;transform:translateX(-50%);z-index:100;background:var(--card);border:1px solid var(--teal);border-radius:20px;padding:12px 20px;display:flex;flex-direction:column;align-items:center;gap:4px;box-shadow:0 4px 20px rgba(42,172,160,.4);min-width:180px;">
+  <div style="font-size:11px;color:var(--g1);font-weight:600;">זמן מנוחה עד לסט הבא</div>
+  <div style="position:relative;width:64px;height:64px;">
+    <svg width="64" height="64" style="transform:rotate(-90deg);"><circle cx="32" cy="32" r="28" fill="none" stroke="var(--bdr2)" stroke-width="5"/><circle id="rtRing" cx="32" cy="32" r="28" fill="none" stroke="var(--teal)" stroke-width="5" stroke-dasharray="175.9" stroke-dashoffset="0" style="transition:stroke-dashoffset .9s linear;"/></svg>
+    <div id="rtSecs" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;color:var(--teal);">2:00</div>
+  </div>
+  <button onclick="skipRest()" style="background:none;border:1px solid var(--bdr2);border-radius:10px;color:var(--g1);font-size:11px;padding:3px 12px;cursor:pointer;">דלג</button>
+</div>
 <!-- ===== MODALS ===== -->
 <div id="modalOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;overflow-y:auto;padding:20px;" onclick="closeModal(event)">
   <div id="modalBox" style="background:var(--card);border:1px solid var(--bdr);border-radius:16px;padding:20px;max-width:440px;margin:auto;position:relative;" onclick="event.stopPropagation()">
@@ -764,7 +797,11 @@ function openAddAthlete(){
         '<option value="1.9">מאוד פעיל (1.9)</option>'+
       '</select></div>'+
     '</div>'+
-    '<div style="margin-bottom:14px;"><label>מטרה כללית</label><input type="text" id="mAthGoal" placeholder="ירידה במשקל, עלייה במסה..."></div>'+
+    '<div style="margin-bottom:8px;"><label>מטרה כללית</label><input type="text" id="mAthGoal" placeholder="ירידה במשקל, עלייה במסה..."></div>'+
+    '<div class="r2" style="margin-bottom:14px;gap:8px;">'+
+      '<div><label>תחילת תוכנית</label><input type="date" id="mAthStart"></div>'+
+      '<div><label>חודשים</label><input type="number" id="mAthMonths" placeholder="3" min="1" max="24"></div>'+
+    '</div>'+
     '<button class="btn btn-p" onclick="saveNewAthlete()">שמור מתאמן</button>');
 }
 function saveNewAthlete(){
@@ -781,7 +818,9 @@ function saveNewAthlete(){
   var height=parseInt(document.getElementById('mAthHeight').value)||170;
   var activityLevel=parseFloat(document.getElementById('mAthActivity').value)||1.55;
   var goal=document.getElementById('mAthGoal').value.trim();
-  aths.push({id:id,name:name,username:user,password:pwd,phone:phone,gender:gender,age:age,height:height,activityLevel:activityLevel,goal:goal});
+  var startDate=document.getElementById('mAthStart').value||td();
+  var months=parseInt(document.getElementById('mAthMonths').value)||3;
+  aths.push({id:id,name:name,username:user,password:pwd,phone:phone,gender:gender,age:age,height:height,activityLevel:activityLevel,goal:goal,startDate:startDate,months:months});
   saveAths(aths);
   // Initialize fresh empty data for new athlete
   localStorage.setItem('mc3_'+id+'_checkins',JSON.stringify([]));
@@ -807,7 +846,11 @@ function openEditAthlete(){
       '<div><label>גובה (ס"מ)</label><input type="number" id="mAthHeight" value="'+(ath.height||'')+'" min="140" max="220"></div>'+
       '<div><label>דרגת פעילות</label><select id="mAthActivity">'+actSel+'</select></div>'+
     '</div>'+
-    '<div style="margin-bottom:14px;"><label>מטרה כללית</label><input type="text" id="mAthGoal" value="'+(ath.goal||'')+'" placeholder="ירידה במשקל..."></div>'+
+    '<div style="margin-bottom:8px;"><label>מטרה כללית</label><input type="text" id="mAthGoal" value="'+(ath.goal||'')+'" placeholder="ירידה במשקל..."></div>'+
+    '<div class="r2" style="margin-bottom:14px;gap:8px;">'+
+      '<div><label>תחילת תוכנית</label><input type="date" id="mAthStart" value="'+(ath.startDate||td())+'"></div>'+
+      '<div><label>חודשים</label><input type="number" id="mAthMonths" value="'+(ath.months||3)+'" min="1" max="24"></div>'+
+    '</div>'+
     '<button class="btn btn-p" onclick="saveEditAthlete()">שמור שינויים</button>');
 }
 function saveEditAthlete(){
@@ -827,6 +870,8 @@ function saveEditAthlete(){
   aths[idx].height=parseInt(document.getElementById('mAthHeight').value)||aths[idx].height||170;
   aths[idx].activityLevel=parseFloat(document.getElementById('mAthActivity').value)||aths[idx].activityLevel||1.55;
   aths[idx].goal=document.getElementById('mAthGoal').value.trim();
+  var startEl=document.getElementById('mAthStart');if(startEl&&startEl.value)aths[idx].startDate=startEl.value;
+  var monEl=document.getElementById('mAthMonths');if(monEl&&monEl.value)aths[idx].months=parseInt(monEl.value)||3;
   saveAths(aths);closeModal();
   document.getElementById('athDetailName').textContent=name;
 }
@@ -1862,14 +1907,17 @@ function rendW(){
       if(pl.notes)h+='<div style="font-size:11px;color:var(--g1);font-style:italic;border-top:1px solid var(--bdr);padding-top:3px;margin-top:3px;">"'+pl.notes+'"</div>';
       h+='</div>';
     }
-    h+='<div style="display:grid;grid-template-columns:28px 1fr 1fr;gap:5px;margin-bottom:4px;">'+
+    var restSecs=120;if(ex.rest){var rm=ex.rest.match(/(\d+)/);if(rm)restSecs=parseInt(rm[1])*60||120;}
+    h+='<div style="display:grid;grid-template-columns:28px 1fr 1fr auto;gap:5px;margin-bottom:4px;">'+
       '<div></div><div style="text-align:center;font-size:10px;color:var(--g2);">משקל</div>'+
-      '<div style="text-align:center;font-size:10px;color:var(--g2);">חזרות</div></div>';
+      '<div style="text-align:center;font-size:10px;color:var(--g2);">חזרות</div>'+
+      '<div style="text-align:center;font-size:10px;color:var(--g2);">✓</div></div>';
     for(var s=0;s<(parseInt(ex.sets)||3);s++){
       var sd=el.sets[s]||{};
       h+='<div class="sg"><div class="sl">סט '+(s+1)+'</div>'+
         '<input type="number" value="'+(sd.w||'')+'" placeholder="0" step="0.5" min="0" style="text-align:center;" data-eid="'+ex.id+'" data-lk="'+lk+'" data-si="'+s+'" data-fld="w" oninput="svS(this)">'+
         '<input type="number" value="'+(sd.r||'')+'" placeholder="0" min="0" style="text-align:center;" data-eid="'+ex.id+'" data-lk="'+lk+'" data-si="'+s+'" data-fld="r" oninput="svS(this)">'+
+        '<button onclick="startRest('+restSecs+')" style="background:var(--teal);border:none;border-radius:8px;color:#fff;font-size:11px;font-weight:700;padding:4px 6px;cursor:pointer;">✓</button>'+
         '</div>';
     }
     h+='<textarea class="nta" placeholder="הערות..." data-eid="'+ex.id+'" data-lk="'+lk+'" oninput="svN(this)">'+(el.notes||'')+'</textarea>';
@@ -2130,15 +2178,16 @@ function closeModal(e){
 
 // ===== ATHLETE VIEW INIT =====
 function showAthView(v){
-  ['w','n','b','ci','mtg'].forEach(function(x){
+  ['home','w','n','b','ci','mtg'].forEach(function(x){
     var el=document.getElementById('av-'+x);if(el)el.classList.toggle('on',x===v);
     var nb=document.getElementById('anb-'+x);if(nb)nb.classList.toggle('on',x===v);
   });
+  if(v==='home'){rendHome();}
   if(v==='w'){rendWD();rendPlan();rendPS();}
-  if(v==='n'){var ndl=document.getElementById('ndLabel');if(ndl)ndl.textContent=fmtD(ND);rendNS();rendND();rendFCT();filterF();buildWA();initMac();}
+  if(v==='n'){var ndl=document.getElementById('ndLabel');if(ndl)ndl.textContent=fmtD(ND);rendNS();rendND();rendFCT();filterF();buildWA();initMac();rendNutPlan();}
   if(v==='b'){rendMeasureTable();rendWS();rendWC();rendWE();rendSt();document.getElementById('wDate').value=td();document.getElementById('stDate').value=td();}
   if(v==='ci'){initCI();rendCIHist();}
-  if(v==='mtg'){rendAthMtg();}
+  if(v==='mtg'){rendAthMtg();rendAthTips();}
 }
 function showAwSub(t,el){
   ['t','p','pr'].forEach(function(x){
@@ -2151,13 +2200,14 @@ function showAwSub(t,el){
   if(t==='pr'){rendPS();}
 }
 function showAnSub(t,el){
-  ['d','m','wa'].forEach(function(x){
+  ['d','m','plan','wa'].forEach(function(x){
     var s=document.getElementById('an-'+x);if(s)s.classList.toggle('on',x===t);
   });
   document.querySelectorAll('#av-n .tabs .tab').forEach(function(b){b.classList.remove('on');});
   if(el)el.classList.add('on');
   if(t==='d'){var ndl=document.getElementById('ndLabel');if(ndl)ndl.textContent=fmtD(ND);rendNS();rendND();rendFCT();filterF();}
   if(t==='m'){initMac();}
+  if(t==='plan'){rendNutPlan();}
   if(t==='wa'){buildWA();}
 }
 function showAbSub(t,el){
@@ -2235,6 +2285,7 @@ function buildNutritionHTML(){
   return '<div class="tabs">'+
     '<button class="tab on" onclick="coachAthSub(\'n-diary\',this)">יומן</button>'+
     '<button class="tab" onclick="coachAthSub(\'n-macro\',this)">מאקרו</button>'+
+    '<button class="tab" onclick="coachAthSub(\'n-plan\',this);setTimeout(function(){var e=document.getElementById(\'coachNutPlanSection\');if(!e){var c=document.getElementById(\'cas-n-plan\');if(c)c.innerHTML=buildCoachNutPlanHTML();}},50)">תפריט</button>'+
     '</div>'+
     '<div id="cas-n-diary" class="ss on">'+
       '<div class="nav-row"><button onclick="chND(-1)">◀</button><span id="ndLabel">'+fmtD(ND)+'</span><button onclick="chND(1)">▶</button></div>'+
@@ -2260,7 +2311,8 @@ function buildNutritionHTML(){
         '<div style="margin-bottom:10px;"><label>שומן %</label><input type="range" id="fatSl" min="0" max="100" value="30" step="1" oninput="onSl(\'f\')"><div style="display:flex;justify-content:space-between;font-size:11px;color:var(--g1);"><span>שומן</span><span id="fatOut"></span></div></div>'+
         '<div id="macPM" style="font-size:11px;color:var(--g1);margin-bottom:8px;"></div>'+
         '<button class="btn btn-p" onclick="saveMac()">שמור יעדים</button></div>'+
-    '</div>';
+    '</div>'+
+    '<div id="cas-n-plan" class="ss">'+buildCoachNutPlanHTML()+'</div>';
 }
 // Durnin-Womersley body fat calculation
 function durninConst(gender,age){
@@ -2516,6 +2568,261 @@ async function syncFromCloud(){
     const data=await res.json();
     Object.entries(data).forEach(([k,v])=>{ if(v) _origSet(k,v); else _origRem(k); });
   }catch(e){}
+}
+
+// ===== HOME SCREEN =====
+function progPct(ath){
+  if(!ath||!ath.startDate||!ath.months)return null;
+  var start=new Date(ath.startDate);
+  var total=ath.months*30;
+  var elapsed=Math.floor((new Date()-start)/(1000*60*60*24));
+  var pct=Math.min(100,Math.max(0,Math.round(elapsed/total*100)));
+  var remaining=Math.max(0,total-elapsed);
+  var endDate=new Date(start);endDate.setDate(endDate.getDate()+total);
+  return {pct:pct,remaining:remaining,endDate:endDate.toISOString().slice(0,10),elapsed:elapsed,total:total};
+}
+function rendHome(){
+  var el=document.getElementById('homeContent');if(!el)return;
+  var ath=getAth(ATH_ID)||{};
+  var prog=progPct(ath);
+  var ws=ld('weights')||[];
+  var lastW=ws.length?ws[ws.length-1]:{};
+  var plan=LP();
+  var today=new Date().getDay();// 0=sun
+  var dayMap={0:'ראשון',1:'שני',2:'שלישי',3:'רביעי',4:'חמישי',5:'שישי',6:'שבת'};
+
+  // Next workout day
+  var wdays=[...new Set(plan.map(function(e){return e.day;}))].sort();
+  var dpw=LDPW()||5;
+  var nextDay='';
+  for(var i=0;i<dpw;i++){if(wdays.indexOf(i)>=0&&i>=CD){nextDay='יום '+(i+1);break;}}
+  if(!nextDay&&wdays.length)nextDay='יום '+(wdays[0]+1);
+
+  // Upcoming meeting
+  var mtgs=loadMtgs().filter(function(m){return m.athleteId===ATH_ID;}).sort(function(a,b){return a.date.localeCompare(b.date);});
+  var nextMtg=mtgs.find(function(m){return m.date>=td();});
+
+  var h='<div style="padding:4px 0 12px;">';
+  h+='<div style="font-size:20px;font-weight:800;margin-bottom:4px;">שלום, '+ath.name+'! 💪</div>';
+  h+='<div style="font-size:12px;color:var(--g1);margin-bottom:16px;">'+new Date().toLocaleDateString('he-IL',{weekday:'long',day:'numeric',month:'long'})+'</div>';
+
+  // Program progress bar
+  if(prog){
+    var barColor=prog.pct<50?'var(--teal)':prog.pct<80?'#f5a623':'#e05';
+    h+='<div class="card" style="margin-bottom:14px;padding:14px 16px;">';
+    h+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">';
+    h+='<span style="font-size:12px;font-weight:700;color:var(--g1);">מעקב תוכנית</span>';
+    h+='<span style="font-size:12px;font-weight:800;color:var(--teal);">'+prog.pct+'%</span></div>';
+    h+='<div style="height:8px;background:var(--bdr2);border-radius:4px;overflow:hidden;margin-bottom:6px;">';
+    h+='<div style="height:100%;width:'+prog.pct+'%;background:'+barColor+';border-radius:4px;transition:width .5s;"></div></div>';
+    h+='<div style="display:flex;justify-content:space-between;font-size:11px;color:var(--g2);">';
+    h+='<span>'+prog.elapsed+' ימים עברו</span><span>'+prog.remaining+' ימים נותרו</span></div>';
+    h+='</div>';
+  }
+
+  // Quick action grid
+  h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">';
+
+  // Morning weight card
+  h+='<div class="card" onclick="showAthView(\'b\')" style="cursor:pointer;padding:16px;display:flex;flex-direction:column;align-items:center;gap:6px;">';
+  h+='<div style="font-size:28px;">⚖️</div>';
+  h+='<div style="font-size:12px;font-weight:700;">מעקב משקלים</div>';
+  if(lastW.v)h+='<div style="font-size:11px;color:var(--teal);font-weight:700;">'+lastW.v+' ק"ג</div>';
+  h+='</div>';
+
+  // Workout card
+  h+='<div class="card" onclick="showAthView(\'w\')" style="cursor:pointer;padding:16px;display:flex;flex-direction:column;align-items:center;gap:6px;">';
+  h+='<div style="font-size:28px;">🏋️</div>';
+  h+='<div style="font-size:12px;font-weight:700;">תכנית אימון</div>';
+  if(nextDay)h+='<div style="font-size:11px;color:var(--teal);font-weight:700;">'+nextDay+'</div>';
+  h+='</div>';
+
+  // Nutrition card
+  h+='<div class="card" onclick="showAthView(\'n\')" style="cursor:pointer;padding:16px;display:flex;flex-direction:column;align-items:center;gap:6px;">';
+  h+='<div style="font-size:28px;">🥗</div>';
+  h+='<div style="font-size:12px;font-weight:700;">תפריט התזונה</div>';
+  h+='<div style="font-size:11px;color:var(--g2);">יומן אכילה</div>';
+  h+='</div>';
+
+  // Profile card
+  h+='<div class="card" onclick="showAthView(\'ci\')" style="cursor:pointer;padding:16px;display:flex;flex-direction:column;align-items:center;gap:6px;">';
+  h+='<div style="font-size:28px;">📊</div>';
+  h+='<div style="font-size:12px;font-weight:700;">סיכום שבועי</div>';
+  h+='<div style="font-size:11px;color:var(--g2);">דוחות</div>';
+  h+='</div>';
+  h+='</div>';
+
+  // Next meeting
+  if(nextMtg){
+    h+='<div class="card" style="margin-bottom:10px;">';
+    h+='<div style="display:flex;align-items:center;gap:8px;">';
+    h+='<span style="font-size:22px;">📅</span>';
+    h+='<div><div style="font-size:12px;font-weight:700;">פגישה קרובה</div>';
+    h+='<div style="font-size:11px;color:var(--teal);">'+nextMtg.date+(nextMtg.time?' | '+nextMtg.time:'')+(nextMtg.note?' — '+nextMtg.note:'')+'</div></div>';
+    h+='</div></div>';
+  }
+
+  // Tips shortcut
+  h+='<div class="card" onclick="showAthView(\'mtg\');setTimeout(function(){showMtgSub(\'tips\',document.getElementById(\'amtg2\'));},100);" style="cursor:pointer;display:flex;align-items:center;gap:12px;padding:14px 16px;">';
+  h+='<span style="font-size:22px;">📚</span>';
+  h+='<div><div style="font-size:12px;font-weight:700;">מדריכים וטיפים</div><div style="font-size:11px;color:var(--g2);">מהמאמן שלך</div></div>';
+  h+='<span style="margin-right:auto;color:var(--g2);">›</span></div>';
+
+  h+='</div>';
+  el.innerHTML=h;
+}
+
+// ===== REST TIMER =====
+var _restTimer=null,_restTotal=0,_restLeft=0;
+function startRest(secs){
+  stopRest();
+  _restTotal=secs||120;_restLeft=_restTotal;
+  var el=document.getElementById('restTimer');
+  if(el){el.style.display='flex';}
+  _updRestUI();
+  _restTimer=setInterval(function(){
+    _restLeft--;
+    if(_restLeft<=0){stopRest();return;}
+    _updRestUI();
+  },1000);
+}
+function _updRestUI(){
+  var m=Math.floor(_restLeft/60);var s=_restLeft%60;
+  var txt=m+':'+(s<10?'0':'')+s;
+  var sec=document.getElementById('rtSecs');if(sec)sec.textContent=txt;
+  var ring=document.getElementById('rtRing');
+  if(ring){var circ=175.9;ring.style.strokeDashoffset=circ*(1-_restLeft/_restTotal);}
+}
+function stopRest(){
+  if(_restTimer){clearInterval(_restTimer);_restTimer=null;}
+  var el=document.getElementById('restTimer');if(el)el.style.display='none';
+}
+function skipRest(){stopRest();}
+
+// ===== MEETINGS SUB-TABS =====
+function showMtgSub(t,el){
+  ['mtg','tips'].forEach(function(x){var s=document.getElementById('amtg-'+x);if(s)s.classList.toggle('on',x===t);});
+  document.querySelectorAll('#av-mtg .tabs .tab').forEach(function(b){b.classList.remove('on');});
+  if(el)el.classList.add('on');
+  if(t==='tips')rendAthTips();
+  if(t==='mtg')rendAthMtg();
+}
+function showCoachMtgSub(t,el){
+  ['cal','tips'].forEach(function(x){var s=document.getElementById('cmtg-'+x);if(s)s.classList.toggle('on',x===t);});
+  document.querySelectorAll('#cv-mtg .tabs .tab').forEach(function(b){b.classList.remove('on');});
+  if(el)el.classList.add('on');
+  if(t==='tips')rendCoachTips();
+  if(t==='cal'){rendCalM();rendMtgList();}
+}
+
+// ===== TIPS =====
+function loadTips(){return gsk('omc_tips')||[];}
+function saveTipsData(arr){gsvk('omc_tips',arr);}
+function saveTip(){
+  var name=document.getElementById('tipName').value.trim();
+  var cat=document.getElementById('tipCat').value;
+  var file=document.getElementById('tipFile');
+  if(!name){alert('נא להזין שם למדריך');return;}
+  if(!file||!file.files||!file.files[0]){alert('נא לבחור קובץ');return;}
+  var reader=new FileReader();
+  reader.onload=function(e){
+    var tips=loadTips();
+    tips.push({id:Date.now(),name:name,cat:cat,data:e.target.result,type:file.files[0].type,size:file.files[0].size});
+    saveTipsData(tips);
+    document.getElementById('tipName').value='';
+    document.getElementById('tipFile').value='';
+    rendCoachTips();
+  };
+  reader.readAsDataURL(file.files[0]);
+}
+function delTip(id){
+  if(!confirm('למחוק מדריך זה?'))return;
+  saveTipsData(loadTips().filter(function(t){return t.id!==id;}));
+  rendCoachTips();
+}
+function rendCoachTips(){
+  var el=document.getElementById('coachTipsList');if(!el)return;
+  var tips=loadTips();
+  if(!tips.length){el.innerHTML='<div class="empty">אין מדריכים עדיין</div>';return;}
+  el.innerHTML=tips.map(function(t){
+    var icon=t.type&&t.type.includes('pdf')?'📄':'🖼️';
+    return '<div class="card" style="display:flex;align-items:center;gap:10px;padding:12px;">'+
+      '<span style="font-size:22px;">'+icon+'</span>'+
+      '<div style="flex:1;"><div style="font-size:13px;font-weight:700;">'+t.name+'</div>'+
+      '<div style="font-size:11px;color:var(--g1);">'+t.cat+'</div></div>'+
+      '<a href="'+t.data+'" download="'+t.name+'" style="color:var(--teal);font-size:20px;text-decoration:none;">⬇</a>'+
+      '<button onclick="delTip('+t.id+')" style="background:none;border:none;color:var(--g2);font-size:18px;cursor:pointer;">🗑</button>'+
+      '</div>';
+  }).join('');
+}
+function rendAthTips(){
+  var el=document.getElementById('athTipsList');if(!el)return;
+  var tips=loadTips();
+  if(!tips.length){el.innerHTML='<div class="empty">אין מדריכים עדיין</div>';return;}
+  el.innerHTML=tips.map(function(t){
+    var icon=t.type&&t.type.includes('pdf')?'📄':'🖼️';
+    return '<div class="card" style="display:flex;align-items:center;gap:10px;padding:12px;" onclick="openTip(\''+t.id+'\')">'+
+      '<span style="font-size:22px;">'+icon+'</span>'+
+      '<div style="flex:1;"><div style="font-size:13px;font-weight:700;">'+t.name+'</div>'+
+      '<div style="font-size:11px;color:var(--g1);">'+t.cat+'</div></div>'+
+      '<span style="color:var(--g2);">›</span></div>';
+  }).join('');
+}
+function openTip(id){
+  var t=loadTips().find(function(x){return x.id===id||x.id===parseInt(id);});
+  if(!t)return;
+  if(t.type&&t.type.includes('pdf')){
+    var w=window.open('','_blank');
+    w.document.write('<html><body style="margin:0"><iframe src="'+t.data+'" width="100%" height="100%" style="border:none;"></iframe></body></html>');
+  } else {
+    var w=window.open('','_blank');
+    w.document.write('<html><body style="margin:0;background:#000;display:flex;align-items:center;justify-content:center;min-height:100vh"><img src="'+t.data+'" style="max-width:100%;max-height:100vh;"></body></html>');
+  }
+}
+
+// ===== NUTRITION PLAN (coach writes, athlete reads) =====
+function loadNutPlan(){return gsk('mc3_'+(ROLE==='coach'?VIEW_ATH:ATH_ID)+'_nut_plan')||{text:'',meals:[]};}
+function saveNutPlanData(d){gsvk('mc3_'+(ROLE==='coach'?VIEW_ATH:ATH_ID)+'_nut_plan',d);}
+function buildCoachNutPlanHTML(){
+  var p=loadNutPlan();
+  return '<div id="coachNutPlanSection" class="card" style="margin-top:12px;">'+
+    '<div class="ct" style="margin-bottom:8px;">תפריט אישי למתאמן</div>'+
+    '<div style="margin-bottom:8px;"><label style="font-size:11px;color:var(--g1);">הנחיות / תפריט חופשי</label>'+
+    '<textarea id="nutPlanText" style="height:100px;width:100%;font-size:12px;" placeholder="רשום תפריט יומי, כמויות, הנחיות...">'+( p.text||'')+'</textarea></div>'+
+    '<button class="btn btn-p" onclick="saveCoachNutPlan()" style="width:100%">💾 שמור תפריט</button>'+
+    '</div>';
+}
+function saveCoachNutPlan(){
+  var t=document.getElementById('nutPlanText');
+  if(!t)return;
+  saveNutPlanData({text:t.value});
+  var btn=t.nextElementSibling;if(btn){var orig=btn.textContent;btn.textContent='✓ נשמר!';setTimeout(function(){btn.textContent=orig;},1500);}
+}
+function rendNutPlan(){
+  var el=document.getElementById('athNutPlanView');if(!el)return;
+  var p=loadNutPlan();
+  if(!p.text){el.innerHTML='<div class="empty">המאמן טרם הגדיר תפריט אישי</div>';return;}
+  el.innerHTML='<div class="card"><div class="ct" style="margin-bottom:8px;">התפריט שלי</div>'+
+    '<div style="font-size:13px;white-space:pre-wrap;line-height:1.6;">'+p.text.replace(/</g,'&lt;')+'</div></div>';
+}
+
+// ===== PROGRAM PROGRESS in coach athlete dashboard =====
+function rendProgBadge(ath){
+  var prog=progPct(ath);
+  if(!prog)return '';
+  var barColor=prog.pct<50?'var(--teal)':prog.pct<80?'#f5a623':'#e05';
+  return '<div style="margin-top:6px;"><div style="display:flex;justify-content:space-between;font-size:10px;color:var(--g1);margin-bottom:2px;"><span>תוכנית: '+ath.months+' חודשים</span><span>'+prog.pct+'%</span></div>'+
+    '<div style="height:5px;background:var(--bdr2);border-radius:3px;overflow:hidden;">'+
+    '<div style="height:100%;width:'+prog.pct+'%;background:'+barColor+';border-radius:3px;"></div></div>'+
+    '<div style="font-size:10px;color:var(--g2);text-align:left;margin-top:1px;">'+prog.remaining+' ימים נותרו</div></div>';
+}
+
+// ===== REST TIMER TRIGGER in workout =====
+function doneSet(exId,restStr,lk,si){
+  // Save any un-saved set data then start rest timer
+  var secs=120;
+  if(restStr){var m=restStr.match(/(\d+)/);if(m)secs=parseInt(m[1])*60||120;}
+  startRest(secs);
 }
 
 // ===== INIT =====
