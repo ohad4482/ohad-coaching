@@ -537,7 +537,7 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
 </div>
 
 <!-- ===== REST TIMER ===== -->
-<div id="restTimer" style="display:none;position:fixed;bottom:76px;left:50%;transform:translateX(-50%);z-index:100;background:var(--card);border:1px solid var(--teal);border-radius:20px;padding:12px 20px;display:flex;flex-direction:column;align-items:center;gap:4px;box-shadow:0 4px 20px rgba(42,172,160,.4);min-width:180px;">
+<div id="restTimer" style="display:none;position:fixed;bottom:76px;left:50%;transform:translateX(-50%);z-index:100;background:var(--card);border:1px solid var(--teal);border-radius:20px;padding:12px 20px;flex-direction:column;align-items:center;gap:4px;box-shadow:0 4px 20px rgba(42,172,160,.4);min-width:180px;">
   <div style="font-size:11px;color:var(--g1);font-weight:600;">זמן מנוחה עד לסט הבא</div>
   <div style="position:relative;width:64px;height:64px;">
     <svg width="64" height="64" style="transform:rotate(-90deg);"><circle cx="32" cy="32" r="28" fill="none" stroke="var(--bdr2)" stroke-width="5"/><circle id="rtRing" cx="32" cy="32" r="28" fill="none" stroke="var(--teal)" stroke-width="5" stroke-dasharray="175.9" stroke-dashoffset="0" style="transition:stroke-dashoffset .9s linear;"/></svg>
@@ -2581,6 +2581,12 @@ function progPct(ath){
   var endDate=new Date(start);endDate.setDate(endDate.getDate()+total);
   return {pct:pct,remaining:remaining,endDate:endDate.toISOString().slice(0,10),elapsed:elapsed,total:total};
 }
+function _navIcon(id){
+  var nb=document.getElementById('anb-'+id);
+  if(!nb)return '';
+  var ni=nb.querySelector('.ni');
+  return ni?ni.innerHTML:'';
+}
 function rendHome(){
   var el=document.getElementById('homeContent');if(!el)return;
   var ath=getAth(ATH_ID)||{};
@@ -2588,14 +2594,11 @@ function rendHome(){
   var ws=ld('weights')||[];
   var lastW=ws.length?ws[ws.length-1]:{};
   var plan=LP();
-  var today=new Date().getDay();// 0=sun
-  var dayMap={0:'ראשון',1:'שני',2:'שלישי',3:'רביעי',4:'חמישי',5:'שישי',6:'שבת'};
 
   // Next workout day
   var wdays=[...new Set(plan.map(function(e){return e.day;}))].sort();
-  var dpw=LDPW()||5;
   var nextDay='';
-  for(var i=0;i<dpw;i++){if(wdays.indexOf(i)>=0&&i>=CD){nextDay='יום '+(i+1);break;}}
+  for(var i=0;i<7;i++){if(wdays.indexOf(i)>=0&&i>=CD){nextDay='יום '+(i+1);break;}}
   if(!nextDay&&wdays.length)nextDay='יום '+(wdays[0]+1);
 
   // Upcoming meeting
@@ -2603,7 +2606,7 @@ function rendHome(){
   var nextMtg=mtgs.find(function(m){return m.date>=td();});
 
   var h='<div style="padding:4px 0 12px;">';
-  h+='<div style="font-size:20px;font-weight:800;margin-bottom:4px;">שלום, '+ath.name+'! 💪</div>';
+  h+='<div style="font-size:20px;font-weight:800;margin-bottom:4px;">שלום, '+(ath.name||'')+'! 💪</div>';
   h+='<div style="font-size:12px;color:var(--g1);margin-bottom:16px;">'+new Date().toLocaleDateString('he-IL',{weekday:'long',day:'numeric',month:'long'})+'</div>';
 
   // Program progress bar
@@ -2620,33 +2623,34 @@ function rendHome(){
     h+='</div>';
   }
 
-  // Quick action grid
+  // Quick action grid — icons pulled from the bottom nav buttons
+  var iconB=_navIcon('b');
+  var iconW=_navIcon('w');
+  var iconN=_navIcon('n');
+  var iconCI=_navIcon('ci');
+
   h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">';
 
-  // Morning weight card
   h+='<div class="card" onclick="showAthView(\'b\')" style="cursor:pointer;padding:16px;display:flex;flex-direction:column;align-items:center;gap:6px;">';
-  h+='<div style="font-size:28px;">⚖️</div>';
-  h+='<div style="font-size:12px;font-weight:700;">מעקב משקלים</div>';
+  h+='<div class="ni" style="font-size:0;">'+iconB+'</div>';
+  h+='<div style="font-size:12px;font-weight:700;">מעקב גוף</div>';
   if(lastW.v)h+='<div style="font-size:11px;color:var(--teal);font-weight:700;">'+lastW.v+' ק"ג</div>';
   h+='</div>';
 
-  // Workout card
   h+='<div class="card" onclick="showAthView(\'w\')" style="cursor:pointer;padding:16px;display:flex;flex-direction:column;align-items:center;gap:6px;">';
-  h+='<div style="font-size:28px;">🏋️</div>';
+  h+='<div class="ni" style="font-size:0;">'+iconW+'</div>';
   h+='<div style="font-size:12px;font-weight:700;">תכנית אימון</div>';
   if(nextDay)h+='<div style="font-size:11px;color:var(--teal);font-weight:700;">'+nextDay+'</div>';
   h+='</div>';
 
-  // Nutrition card
   h+='<div class="card" onclick="showAthView(\'n\')" style="cursor:pointer;padding:16px;display:flex;flex-direction:column;align-items:center;gap:6px;">';
-  h+='<div style="font-size:28px;">🥗</div>';
-  h+='<div style="font-size:12px;font-weight:700;">תפריט התזונה</div>';
+  h+='<div class="ni" style="font-size:0;">'+iconN+'</div>';
+  h+='<div style="font-size:12px;font-weight:700;">תפריט תזונה</div>';
   h+='<div style="font-size:11px;color:var(--g2);">יומן אכילה</div>';
   h+='</div>';
 
-  // Profile card
   h+='<div class="card" onclick="showAthView(\'ci\')" style="cursor:pointer;padding:16px;display:flex;flex-direction:column;align-items:center;gap:6px;">';
-  h+='<div style="font-size:28px;">📊</div>';
+  h+='<div class="ni" style="font-size:0;">'+iconCI+'</div>';
   h+='<div style="font-size:12px;font-weight:700;">סיכום שבועי</div>';
   h+='<div style="font-size:11px;color:var(--g2);">דוחות</div>';
   h+='</div>';
@@ -2654,17 +2658,19 @@ function rendHome(){
 
   // Next meeting
   if(nextMtg){
-    h+='<div class="card" style="margin-bottom:10px;">';
+    var iconMtg=_navIcon('mtg');
+    h+='<div class="card" onclick="showAthView(\'mtg\')" style="cursor:pointer;margin-bottom:10px;">';
     h+='<div style="display:flex;align-items:center;gap:8px;">';
-    h+='<span style="font-size:22px;">📅</span>';
+    h+='<div class="ni" style="font-size:0;flex-shrink:0;">'+iconMtg+'</div>';
     h+='<div><div style="font-size:12px;font-weight:700;">פגישה קרובה</div>';
     h+='<div style="font-size:11px;color:var(--teal);">'+nextMtg.date+(nextMtg.time?' | '+nextMtg.time:'')+(nextMtg.note?' — '+nextMtg.note:'')+'</div></div>';
     h+='</div></div>';
   }
 
-  // Tips shortcut
+  // Tips shortcut — use same icon as meetings
+  var iconMtg2=_navIcon('mtg');
   h+='<div class="card" onclick="showAthView(\'mtg\');setTimeout(function(){showMtgSub(\'tips\',document.getElementById(\'amtg2\'));},100);" style="cursor:pointer;display:flex;align-items:center;gap:12px;padding:14px 16px;">';
-  h+='<span style="font-size:22px;">📚</span>';
+  h+='<div class="ni" style="font-size:0;flex-shrink:0;">'+iconCI+'</div>';
   h+='<div><div style="font-size:12px;font-weight:700;">מדריכים וטיפים</div><div style="font-size:11px;color:var(--g2);">מהמאמן שלך</div></div>';
   h+='<span style="margin-right:auto;color:var(--g2);">›</span></div>';
 
@@ -2678,7 +2684,7 @@ function startRest(secs){
   stopRest();
   _restTotal=secs||120;_restLeft=_restTotal;
   var el=document.getElementById('restTimer');
-  if(el){el.style.display='flex';}
+  if(el){el.style.display='flex';el.style.flexDirection='column';}
   _updRestUI();
   _restTimer=setInterval(function(){
     _restLeft--;
@@ -2724,6 +2730,7 @@ function saveTip(){
   var file=document.getElementById('tipFile');
   if(!name){alert('נא להזין שם למדריך');return;}
   if(!file||!file.files||!file.files[0]){alert('נא לבחור קובץ');return;}
+  if(file.files[0].size>400*1024){alert('הקובץ גדול מדי (מקסימום 400KB). נסה לדחוס את הקובץ לפני ההעלאה.');return;}
   var reader=new FileReader();
   reader.onload=function(e){
     var tips=loadTips();
