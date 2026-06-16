@@ -2724,7 +2724,7 @@ function showCoachMtgSub(t,el){
 // ===== TIPS =====
 function loadTips(){return gsk('omc_tips')||[];}
 function saveTipsData(arr){gsvk('omc_tips',arr);}
-function saveTip(){
+async function saveTip(){
   var name=document.getElementById('tipName').value.trim();
   var cat=document.getElementById('tipCat').value;
   var fileEl=document.getElementById('tipFile');
@@ -2732,34 +2732,82 @@ function saveTip(){
   if(!name){alert('נא להזין שם למדריך');return;}
   if(!fileEl||!fileEl.files||!fileEl.files[0]){alert('נא לבחור קובץ');return;}
   var file=fileEl.files[0];
+  var ext=(file.name.match(/\.[^.]+$/)||[''])[0];
+  var filename=name.replace(/\s+/g,'-')+'-'+Date.now()+ext;
+  var contentType=file.type||'application/octet-stream';
   var origTxt=uploadBtn?uploadBtn.textContent:'';
-  if(uploadBtn){uploadBtn.disabled=true;uploadBtn.textContent='מעלה... 0%';}
-  var xhr=new XMLHttpRequest();
-  xhr.open('POST','/api/upload');
-  xhr.setRequestHeader('x-filename',encodeURIComponent(name.replace(/\s+/g,'-'))+'-'+Date.now()+(file.name.match(/\.[^.]+$/)||[''])[0]);
-  xhr.setRequestHeader('content-type',file.type||'application/octet-stream');
-  xhr.upload.onprogress=function(e){
-    if(e.lengthComputable&&uploadBtn)uploadBtn.textContent='מעלה... '+Math.round(e.loaded/e.total*100)+'%';
-  };
-  xhr.onload=function(){
-    if(uploadBtn){uploadBtn.disabled=false;uploadBtn.textContent=origTxt;}
-    if(xhr.status===200){
-      var res=JSON.parse(xhr.responseText);
-      var tips=loadTips();
-      tips.push({id:Date.now(),name:name,cat:cat,url:res.url,type:file.type,size:file.size});
-      saveTipsData(tips);
-      document.getElementById('tipName').value='';
-      fileEl.value='';
-      rendCoachTips();
+  function setBtn(txt,dis){if(uploadBtn){uploadBtn.textContent=txt;uploadBtn.disabled=!!dis;}}
+  setBtn('מכין העלאה...',true);
+
+  var CHUNK=4*1024*1024; // 4MB chunks
+
+  try{
+    var url;
+    if(file.size<=CHUNK){
+      // Small file: single PUT
+      setBtn('מעלה... 0%',true);
+      var r=await fetch('/api/upload',{
+        method:'POST',
+        headers:{'x-upload-action':'put','x-filename':filename,'x-content-type':contentType},
+        body:file
+      });
+      if(!r.ok)throw new Error(await r.text());
+      url=(await r.json()).url;
     } else {
-      alert('שגיאה בהעלאה: '+(xhr.responseText||xhr.status));
+      // Large file: multipart
+      var startR=await fetch('/api/upload',{
+        method:'POST',
+        headers:{'x-upload-action':'start','content-type':'application/json'},
+        body:JSON.stringify({filename:filename,contentType:contentType})
+      });
+      if(!startR.ok)throw new Error(await startR.text());
+      var startJ=await startR.json();
+      var uploadId=startJ.uploadId, key=startJ.key;
+
+      var parts=[], partNum=0, offset=0;
+      var total=file.size;
+      while(offset<total){
+        partNum++;
+        var slice=file.slice(offset,offset+CHUNK);
+        offset+=CHUNK;
+        setBtn('מעלה... '+Math.round((offset>total?total:offset)/total*100)+'%',true);
+        var pR=await fetch('/api/upload',{
+          method:'POST',
+          headers:{
+            'x-upload-action':'part',
+            'x-upload-id':uploadId,
+            'x-upload-key':key,
+            'x-part-number':String(partNum),
+            'content-type':'application/octet-stream'
+          },
+          body:slice
+        });
+        if(!pR.ok)throw new Error(await pR.text());
+        var pJ=await pR.json();
+        parts.push({partNumber:partNum,etag:pJ.etag});
+      }
+
+      setBtn('מסיים...',true);
+      var compR=await fetch('/api/upload',{
+        method:'POST',
+        headers:{'x-upload-action':'complete','content-type':'application/json'},
+        body:JSON.stringify({uploadId:uploadId,key:key,parts:parts})
+      });
+      if(!compR.ok)throw new Error(await compR.text());
+      url=(await compR.json()).url;
     }
-  };
-  xhr.onerror=function(){
-    if(uploadBtn){uploadBtn.disabled=false;uploadBtn.textContent=origTxt;}
-    alert('שגיאת רשת בהעלאה');
-  };
-  xhr.send(file);
+
+    var tips=loadTips();
+    tips.push({id:Date.now(),name:name,cat:cat,url:url,type:contentType,size:file.size});
+    saveTipsData(tips);
+    document.getElementById('tipName').value='';
+    fileEl.value='';
+    setBtn(origTxt,false);
+    rendCoachTips();
+  } catch(err){
+    setBtn(origTxt,false);
+    alert('שגיאה בהעלאה: '+err.message);
+  }
 }
 function delTip(id){
   if(!confirm('למחוק מדריך זה?'))return;
