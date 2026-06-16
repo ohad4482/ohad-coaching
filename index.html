@@ -232,7 +232,7 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
     <!-- CV: dashboard -->
     <div id="cv-dash" class="ss on">
       <div style="margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;">
-        <span style="font-size:16px;font-weight:700;">שלום, אוהד 👋</span>
+        <span style="font-size:16px;font-weight:700;">שלום, אוהד </span>
         <button class="btn btn-p btn-sm" onclick="openAddAthlete()">+ מתאמן חדש</button>
       </div>
       <div id="dashGrid"></div>
@@ -264,8 +264,8 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
     <!-- CV: meetings -->
     <div id="cv-mtg" class="ss">
       <div class="tabs" style="margin-bottom:12px;">
-        <button class="tab on" id="cmtg1" onclick="showCoachMtgSub('cal',this)">📅 פגישות</button>
-        <button class="tab" id="cmtg2" onclick="showCoachMtgSub('tips',this)">📚 מדריכים</button>
+        <button class="tab on" id="cmtg1" onclick="showCoachMtgSub('cal',this)"> פגישות</button>
+        <button class="tab" id="cmtg2" onclick="showCoachMtgSub('tips',this)"> מדריכים</button>
       </div>
       <div id="cmtg-cal" class="ss on">
         <div class="nav-row"><button onclick="chCalM(-1)">◀</button><span id="calTitle"></span><button onclick="chCalM(1)">▶</button></div>
@@ -275,7 +275,7 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
         <div class="card" style="margin-top:10px;">
           <div class="ct">תזכורות שבועיות</div>
           <div style="font-size:12px;color:var(--g1);margin-bottom:10px;">שלח תזכורת לכל המתאמנים לסיכום שבועי</div>
-          <button class="btn btn-s" onclick="sendWeeklyReminders()">📱 צור קישורי WhatsApp לכל המתאמנים</button>
+          <button class="btn btn-s" onclick="sendWeeklyReminders()"> צור קישורי WhatsApp לכל המתאמנים</button>
           <div id="weeklyReminderLinks" style="margin-top:8px;"></div>
         </div>
       </div>
@@ -490,26 +490,26 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
       </div>
       <div id="ci-form" class="ss on">
         <div class="card">
-          <div style="font-size:15px;font-weight:800;margin-bottom:4px;">סיכום שבועי 💪</div>
+          <div style="font-size:15px;font-weight:800;margin-bottom:4px;">סיכום שבועי </div>
           <div style="font-size:11px;color:var(--g2);margin-bottom:14px;" id="ciWeekLabel"></div>
           <div class="ct">תמונות (עד 3)</div>
           <div class="photo-grid" id="ciPhotoGrid"></div>
-          <label class="uarea" id="ciUploadBtn" onclick="triggerPhotoUpload()">📷 הוסף תמונה</label>
+          <label class="uarea" id="ciUploadBtn" onclick="triggerPhotoUpload()"> הוסף תמונה</label>
           <input type="file" id="ciPhotoInput" accept="image/*" style="display:none;" onchange="onPhotoUpload(this)">
           <div class="divider"></div>
           <div class="ct">ממוצעים שבועיים (מחושב אוטומטית)</div>
           <div class="r3" id="ciAutoStats"></div>
           <div class="divider"></div>
           <div class="ct">דירוג 1-10</div>
-          <div class="rt-row"><span class="rt-lbl">🍽️ תזונה</span><input type="range" min="1" max="10" value="5" id="rt-nut" oninput="updRt('nut',this.value)"><span class="rt-val" id="rv-nut">5</span></div>
-          <div class="rt-row"><span class="rt-lbl">🏋️ אימונים</span><input type="range" min="1" max="10" value="5" id="rt-trn" oninput="updRt('trn',this.value)"><span class="rt-val" id="rv-trn">5</span></div>
-          <div class="rt-row"><span class="rt-lbl">😴 שינה</span><input type="range" min="1" max="10" value="5" id="rt-slp" oninput="updRt('slp',this.value)"><span class="rt-val" id="rv-slp">5</span></div>
-          <div class="rt-row"><span class="rt-lbl">⚡ התאוששות</span><input type="range" min="1" max="10" value="5" id="rt-rec" oninput="updRt('rec',this.value)"><span class="rt-val" id="rv-rec">5</span></div>
-          <div class="rt-row"><span class="rt-lbl">🍩 רעב</span><input type="range" min="1" max="10" value="5" id="rt-hun" oninput="updRt('hun',this.value)"><span class="rt-val" id="rv-hun">5</span></div>
+          <div class="rt-row"><span class="rt-lbl"> תזונה</span><input type="range" min="1" max="10" value="5" id="rt-nut" oninput="updRt('nut',this.value)"><span class="rt-val" id="rv-nut">5</span></div>
+          <div class="rt-row"><span class="rt-lbl"> אימונים</span><input type="range" min="1" max="10" value="5" id="rt-trn" oninput="updRt('trn',this.value)"><span class="rt-val" id="rv-trn">5</span></div>
+          <div class="rt-row"><span class="rt-lbl"> שינה</span><input type="range" min="1" max="10" value="5" id="rt-slp" oninput="updRt('slp',this.value)"><span class="rt-val" id="rv-slp">5</span></div>
+          <div class="rt-row"><span class="rt-lbl"> התאוששות</span><input type="range" min="1" max="10" value="5" id="rt-rec" oninput="updRt('rec',this.value)"><span class="rt-val" id="rv-rec">5</span></div>
+          <div class="rt-row"><span class="rt-lbl"> רעב</span><input type="range" min="1" max="10" value="5" id="rt-hun" oninput="updRt('hun',this.value)"><span class="rt-val" id="rv-hun">5</span></div>
           <div class="divider"></div>
           <div style="margin-bottom:10px;"><label>התקדמות באימונים (במילים)</label><textarea id="ciProgress" style="height:55px;" placeholder="איך היו האימונים השבוע? משקלים, תחושה..."></textarea></div>
           <div style="margin-bottom:10px;"><label>הערות כלליות</label><textarea id="ciText" style="height:55px;" placeholder="איך היה השבוע בכלל?"></textarea></div>
-          <button class="btn btn-p" onclick="submitCI()">📤 שלח סיכום למאמן</button>
+          <button class="btn btn-p" onclick="submitCI()"> שלח סיכום למאמן</button>
         </div>
       </div>
       <div id="ci-hist" class="ss">
@@ -519,8 +519,8 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
     <!-- AV: meetings + tips -->
     <div id="av-mtg" class="ss">
       <div class="tabs" style="margin-bottom:12px;">
-        <button class="tab on" id="amtg1" onclick="showMtgSub('mtg',this)">📅 פגישות</button>
-        <button class="tab" id="amtg2" onclick="showMtgSub('tips',this)">📚 מדריכים</button>
+        <button class="tab on" id="amtg1" onclick="showMtgSub('mtg',this)"> פגישות</button>
+        <button class="tab" id="amtg2" onclick="showMtgSub('tips',this)"> מדריכים</button>
       </div>
       <div id="amtg-mtg" class="ss on"><div id="athMtgList"></div></div>
       <div id="amtg-tips" class="ss"><div id="athTipsList"><div class="empty">אין מדריכים עדיין</div></div></div>
@@ -626,7 +626,7 @@ function doLoginAth(){
   ROLE='athlete';ATH_ID=found.id;
   document.getElementById('scLogin').classList.remove('on');
   document.getElementById('scAthlete').classList.add('on');
-  document.getElementById('athWelcome').textContent='שלום, '+found.name+' 👋';
+  document.getElementById('athWelcome').textContent='שלום, '+found.name+' ';
   initAthView();
 }
 function doLogout(){
@@ -676,7 +676,7 @@ function rendDash(){
     h+='<div class="ath-hd"><div class="ath-av">'+initials+'</div>';
     h+='<div><div style="font-size:14px;font-weight:700;">'+a.name+'</div>';
     h+='<div style="font-size:11px;color:var(--g2);">'+a.username+'</div></div>';
-    if(hasCI)h+='<span class="badge badge-t" style="margin-right:auto;">✓ סיכום</span>';
+    if(hasCI)h+='<span class="badge badge-t" style="margin-right:auto;"> סיכום</span>';
     h+='</div>';
     h+='<div class="ath-ms">';
     h+='<div class="ams"><div class="av">'+(lastW?lastW.toFixed(1):'---')+'</div><div class="al">משקל</div></div>';
@@ -730,13 +730,13 @@ function showAthTab(tab,el){
 function waSendCI(ci){
   var ath=getAth(VIEW_ATH)||{};
   var msg='*סיכום שבועי - שבוע '+ci.weekLabel+'*\n\n';
-  if(ci.avgCals)msg+='🍽️ ממוצע קלוריות: '+ci.avgCals+'\n';
-  if(ci.avgProt)msg+='💪 ממוצע חלבון: '+ci.avgProt+'ג\n';
-  if(ci.avgSteps)msg+='👟 ממוצע צעדים: '+ci.avgSteps+'\n\n';
+  if(ci.avgCals)msg+=' ממוצע קלוריות: '+ci.avgCals+'\n';
+  if(ci.avgProt)msg+=' ממוצע חלבון: '+ci.avgProt+'ג\n';
+  if(ci.avgSteps)msg+=' ממוצע צעדים: '+ci.avgSteps+'\n\n';
   var scores=ci.scores||{};
   var labels={nut:'תזונה',trn:'אימונים',slp:'שינה',rec:'התאוששות',hun:'רעב'};
   Object.keys(labels).forEach(function(k){if(scores[k])msg+=labels[k]+': '+scores[k]+'/10\n';});
-  if(ci.progress)msg+='\n🏋️ '+ci.progress;
+  if(ci.progress)msg+='\n '+ci.progress;
   if(ci.text)msg+='\n\n'+ci.text;
   window.open('https://wa.me/'+(ath.phone||'')+'?text='+encodeURIComponent(msg),'_blank');
 }
@@ -750,7 +750,7 @@ function buildCIHistHTML(){
     h+='<span style="font-size:14px;font-weight:700;">שבוע '+ci.weekLabel+'</span>';
     var ciIdx=cis.length-1-cis.slice().reverse().indexOf(ci);
     window._ciCache=window._ciCache||[];window._ciCache[ciIdx]=ci;
-    if(ath.phone){h+='<button class="btn btn-s btn-sm" onclick="waSendCI(window._ciCache['+ciIdx+'])"> ↗ וואטסאפ</button>';}
+    if(ath.phone){h+='<button class="btn btn-s btn-sm" onclick="waSendCI(window._ciCache['+ciIdx+'])">  וואטסאפ</button>';}
     h+='</div>';
     if(ci.photos&&ci.photos.length){
       h+='<div class="photo-grid">';
@@ -833,7 +833,7 @@ function openEditAthlete(){
   var acts=['1.2','1.375','1.55','1.725','1.9'];
   var actLabels=['ישיבה (1.2)','קלה (1.375)','מתונה (1.55)','פעיל (1.725)','מאוד פעיל (1.9)'];
   var actSel=acts.map(function(v,i){return '<option value="'+v+'"'+(String(ath.activityLevel||1.55)===v?' selected':'')+'>'+actLabels[i]+'</option>';}).join('');
-  openModal('<div style="font-size:16px;font-weight:800;margin-bottom:14px;">✎ עריכת '+ath.name+'</div>'+
+  openModal('<div style="font-size:16px;font-weight:800;margin-bottom:14px;"> עריכת '+ath.name+'</div>'+
     '<div style="margin-bottom:8px;"><label>שם מלא</label><input type="text" id="mAthName" value="'+ath.name+'"></div>'+
     '<div style="margin-bottom:8px;"><label>שם משתמש</label><input type="text" id="mAthUser" value="'+ath.username+'"></div>'+
     '<div style="margin-bottom:8px;"><label>סיסמה חדשה (השאר ריק לשמור)</label><input type="password" id="mAthPwd" placeholder=""></div>'+
@@ -1042,13 +1042,13 @@ function rendMtgList(){
     h+='<div style="display:flex;justify-content:space-between;align-items:flex-start;">';
     h+='<div><div class="mtg-date">'+parseInt(p[2])+'/'+parseInt(p[1])+'</div>';
     h+='<div style="font-size:14px;font-weight:700;">'+(ath?ath.name:'')+'</div>';
-    h+='<div style="font-size:12px;color:var(--g1);">🕐 '+m.time+' · ⏱ '+m.duration+' דקי · 📍 '+m.location+'</div></div>';
+    h+='<div style="font-size:12px;color:var(--g1);"> '+m.time+' · ⏱ '+m.duration+' דקי ·  '+m.location+'</div></div>';
     h+='<div style="display:flex;flex-direction:column;gap:5px;">';
     if(ath&&ath.phone){
       var msg=buildMtgReminderMsg(ath,m);
       var url='https://wa.me/'+ath.phone.replace(/[^0-9]/g,'')+
         '?text='+encodeURIComponent(msg);
-      h+='<a href="'+url+'" target="_blank" class="btn btn-s btn-sm" style="text-align:center;text-decoration:none;">📱 תזכורת</a>';
+      h+='<a href="'+url+'" target="_blank" class="btn btn-s btn-sm" style="text-align:center;text-decoration:none;"> תזכורת</a>';
     }
     h+='<button class="btn btn-d btn-sm" onclick="delMtg('+m.id+')">'+
       'מחק</button>';
@@ -1058,18 +1058,18 @@ function rendMtgList(){
 }
 function buildMtgReminderMsg(ath,m){
   var p=m.date.split('-');
-  return 'היי '+ath.name+' 👋\n\n'+
+  return 'היי '+ath.name+' \n\n'+
     'תזכורת לפגישה מחר:\n'+
-    '📅 '+parseInt(p[2])+'/'+parseInt(p[1])+'/'+p[0]+'\n'+
-    '🕐 '+m.time+'\n'+
+    ' '+parseInt(p[2])+'/'+parseInt(p[1])+'/'+p[0]+'\n'+
+    ' '+m.time+'\n'+
     '⏱ '+m.duration+' דקות\n'+
-    '📍 '+m.location+'\n\n'+
+    ' '+m.location+'\n\n'+
     '_Ohad Meir Coaching_';
 }
 function openAddMeeting(preDate){
   var aths=loadAths();
   var opts=aths.map(function(a){return '<option value="'+a.id+'">'+a.name+'</option>';}).join('');
-  openModal('<div style="font-size:16px;font-weight:800;margin-bottom:14px;">📅 קבע פגישה</div>'+
+  openModal('<div style="font-size:16px;font-weight:800;margin-bottom:14px;"> קבע פגישה</div>'+
     '<div style="margin-bottom:8px;"><label>מתאמן</label><select id="mtgAth">'+opts+'</select></div>'+
     '<div class="r2"><div><label>תאריך</label><input type="date" id="mtgDate" value="'+((preDate)||td())+'"></div>'+
     '<div><label>שעה</label><input type="time" id="mtgTime" value="09:00"></div></div>'+
@@ -1099,12 +1099,12 @@ function sendWeeklyReminders(){
   if(!aths.length){alert('אין מתאמנים עם מספר טלפון');return;}
   var h='<div style="font-size:12px;font-weight:700;margin-bottom:6px;">לחץ לשלוח לכל מתאמן:</div>';
   aths.forEach(function(a){
-    var msg='היי '+a.name+' 👋\n\n'+
-      'זכור לשלוח את הסיכום השבועי שלך דרך האפליקציה 📊\n\n'+
-      'טופס הסיכום כולל:\n✅ תמונות שבועיות\n✅ ממוצע צעדים, קלוריות, חלבון\n✅ דירוג השבוע\n\n_Ohad Meir Coaching_';
+    var msg='היי '+a.name+' \n\n'+
+      'זכור לשלוח את הסיכום השבועי שלך דרך האפליקציה \n\n'+
+      'טופס הסיכום כולל:\n תמונות שבועיות\n ממוצע צעדים, קלוריות, חלבון\n דירוג השבוע\n\n_Ohad Meir Coaching_';
     var url='https://wa.me/'+a.phone.replace(/[^0-9]/g,'')+
       '?text='+encodeURIComponent(msg);
-    h+='<a href="'+url+'" target="_blank" class="walink" style="margin-bottom:5px;">📱 '+a.name+'</a>';
+    h+='<a href="'+url+'" target="_blank" class="walink" style="margin-bottom:5px;"> '+a.name+'</a>';
   });
   document.getElementById('weeklyReminderLinks').innerHTML=h;
 }
@@ -1157,7 +1157,7 @@ function rendWE(){
     h+='<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--bdr);font-size:12px;">';
     h+='<span style="color:var(--g2);">'+wt.d+'</span>';
     h+='<span style="font-weight:700;">'+wt.w.toFixed(1)+' קג</span>';
-    h+='<button class="delb" onclick="delW(\''+wt.d+'\')">✕</button>';
+    h+='<button class="delb" onclick="delW(\''+wt.d+'\')"></button>';
     h+='</div>';
   });
   h+='</div>';
@@ -1470,7 +1470,7 @@ function rendND(){
       var gi=entries.indexOf(it);
       h+='<div class="meal-row"><span style="flex:1;">'+it.n+' <span style="font-size:9px;color:var(--g2);">'+it.q+'ג</span></span>'+
         '<span style="font-size:10px;color:var(--g2);margin-left:6px;">'+Math.round(it.c)+'קל C'+Math.round(it.p)+'ג</span>'+
-        '<button class="delb" data-i="'+gi+'" onclick="delFE(parseInt(this.dataset.i))">✕</button></div>';
+        '<button class="delb" data-i="'+gi+'" onclick="delFE(parseInt(this.dataset.i))"></button></div>';
     });
     h+='</div>';
   });
@@ -1537,7 +1537,7 @@ function buildWA(){
   var tp=Math.round(e.reduce(function(a,x){return a+(x.p||0);},0)*10)/10;
   var tk=Math.round(e.reduce(function(a,x){return a+(x.k||0);},0)*10)/10;
   var tf=Math.round(e.reduce(function(a,x){return a+(x.f||0);},0)*10)/10;
-  var msg='*סיכום תזונה יומי* 🥗\n*'+name+'* — '+fmtD(ND)+'\n━━━━━━━━\n\n';
+  var msg='*סיכום תזונה יומי* \n*'+name+'* — '+fmtD(ND)+'\n━━━━━━━━\n\n';
   slots.forEach(function(slot){
     var items=e.filter(function(x){return x.m===slot;});if(!items.length)return;
     var mc=Math.round(items.reduce(function(a,i){return a+(i.c||0);},0));
@@ -1545,8 +1545,8 @@ function buildWA(){
     items.forEach(function(it){msg+='• '+it.n+' '+it.q+'ג — '+Math.round(it.c)+' קל\n';});
     msg+='\n';
   });
-  msg+='━━━━━━━━\n'+(tc>=g.cals*0.9&&tc<=g.cals*1.1?'✅':'⚠️')+' קלוריות: *'+tc+'* / '+g.cals+'\n'+
-    (tp>=g.prot*0.9?'✅':'⚠️')+' חלבון: *'+tp+'ג* / '+g.prot+'ג\n'+
+  msg+='━━━━━━━━\n'+(tc>=g.cals*0.9&&tc<=g.cals*1.1?'':'')+' קלוריות: *'+tc+'* / '+g.cals+'\n'+
+    (tp>=g.prot*0.9?'':'')+' חלבון: *'+tp+'ג* / '+g.prot+'ג\n'+
     'פחמימות: *'+tk+'ג* / '+g.carb+'ג\nשומן: *'+tf+'ג* / '+g.fat+'ג';
   if(note)msg+='\n\n*הערה:* '+note;
   msg+='\n\n_Ohad Meir Coaching_';
@@ -1556,27 +1556,27 @@ function buildWA(){
   var act=document.getElementById('waAct');if(!act)return;
   if(!e.length){act.innerHTML='<div class="empty" style="padding:8px 0;">אין ארוחות</div>';return;}
   var url='https://api.whatsapp.com/send?text='+encodeURIComponent(msg);
-  act.innerHTML='<a class="walink" href="'+url+'" target="_blank" rel="noopener">📱 שלח בWhatsApp</a>'+
-    '<button class="cpbtn" onclick="cpWA()">📋 העתק</button>';
+  act.innerHTML='<a class="walink" href="'+url+'" target="_blank" rel="noopener"> שלח בWhatsApp</a>'+
+    '<button class="cpbtn" onclick="cpWA()"> העתק</button>';
 }
 function cpWA(){
   var el=document.getElementById('waPrev');if(!el)return;
   navigator.clipboard.writeText(el.textContent).then(function(){
-    var b=document.querySelector('.cpbtn');if(b){b.textContent='✅ הועתק!';setTimeout(function(){b.textContent='📋 העתק';},2000);}
+    var b=document.querySelector('.cpbtn');if(b){b.textContent=' הועתק!';setTimeout(function(){b.textContent=' העתק';},2000);}
   }).catch(function(){});
 }
 
 // ===== WORKOUT =====
 var METHODS=[
-  {id:'m1',name:'שיטה 1',reps:'6-8',rest:'3 דקות',desc:'כל סט לכשל - אם עוברים את הטווח מעלים משקל'},
-  {id:'m2',name:'Back Off',reps:'6-10',rest:'2+ דקות',desc:'סט אחרון BACK OFF - הורדה 20% ועבודה לכשל'},
-  {id:'m3',name:'מיורפס',reps:'8-10',rest:'1-2 דקות',desc:'לכשל, 10 שניות מנוחה, המשך עם אותו משקל'},
-  {id:'m4',name:'דרופ סט',reps:'8-12',rest:'דקה',desc:'לכשל, הורדה 20%, המשך בלי מנוחה'},
-  {id:'m5',name:'סופר סט',reps:'10-12',rest:'30 שניות',desc:'2 תרגילים יחד בלי מנוחה ביניהם'},
-  {id:'m6',name:'פאוז רפ',reps:'10-14',rest:'---',desc:'עצירה מוחלטת בין חזרה לחזרה'},
-  {id:'m7',name:'פירמידה',reps:'15-20',rest:'---',desc:'סט ראשון מקסימום משקל, בסטים הבאים להוריד'},
-  {id:'m8',name:'שיטה 8',reps:'20-25',rest:'---',desc:'סט חימום אחד, לאחר מכן כל סט לכשל'},
-  {id:'m9',name:'MAX',reps:'MAX',rest:'---',desc:'להישאר שנייה בשיא הכיוון, שליטה מקסימלית'}
+  {id:'m1',name:'כשל + העלאת משקל',reps:'6-12',rest:'3 דקות',desc:'כל סט לכשל — אם עוברים את טווח החזרות, מעלים משקל'},
+  {id:'m2',name:'Back Off Set',reps:'6-12',rest:'2-3 דקות',desc:'סט אחרון BACK OFF SET — הורדה של כ-20% ממשקל העבודה, עבודה לכשל'},
+  {id:'m3',name:'מיורפס',reps:'8-12',rest:'10 שניות',desc:'הגעה לכשל, מנוחה 10 שניות ו-3-4 נשימות עמוקות, המשך עם אותו משקל לכשל — 2-4 חזרות לפחות'},
+  {id:'m4',name:'דרופ סט',reps:'8-12',rest:'ללא מנוחה',desc:'הגעה לכשל, הורדה של 20% ממשקל העבודה, המשך הסט ללא מנוחה'},
+  {id:'m5',name:'סופר סט',reps:'8-15',rest:'ללא מנוחה',desc:'ביצוע 2 תרגילים יחד ללא מנוחה ביניהם'},
+  {id:'m6',name:'פאוז רפ',reps:'8-12',rest:'3 דקות',desc:'עצירה מוחלטת בין חזרה לחזרה'},
+  {id:'m7',name:'פירמידה הפוכה',reps:'6-15',rest:'2-3 דקות',desc:'חימום טוב לפני, סט עבודה ראשון עם מקסימום משקל, בסטים הבאים להוריד משקל בהתאם לחזרות'},
+  {id:'m8',name:'חימום + כשל',reps:'8-15',rest:'3 דקות',desc:'סט אחד של חימום והזרמת דם (לא כלול בספירת הסטים), לאחר מכן כל סט לכשל'},
+  {id:'m9',name:'שיא כיווץ',reps:'10-15',rest:'2-3 דקות',desc:'להישאר כשנייה בשיא הכיווץ, שליטה מקסימלית בתנועה'}
 ];
 var MUSCLES=['הכל','חזה','גב','ארבע ראשי','המסטינג/ישבן','תאומים','כתפיים','יד אחורית','יד קדמית','בטן','אירובי'];
 var EDB=[
@@ -1760,7 +1760,11 @@ var EDB=[
 function LP(){return ld('plan')||[];}
 function SaveP(p){sv('plan',p);}
 function LDPW(){return parseInt(ld('dpw'))||4;}
-function GDN(n){var nm=['יום א','יום ב','יום ג','יום ד','יום ה','יום ו','יום ז'];return nm.slice(0,n);}
+var _DEFAULT_DAYS=['יום א','יום ב','יום ג','יום ד','יום ה','יום ו','יום ז'];
+function LDNS(){return ld('dayNames')||_DEFAULT_DAYS;}
+function SDNS(arr){sv('dayNames',arr);}
+function GDN(n){var ns=LDNS();return ns.slice(0,n);}
+function saveDayName(idx,val){var ns=LDNS();ns[idx]=val||_DEFAULT_DAYS[idx];SDNS(ns);}
 function GWK(w){var now=new Date();var m=new Date(now);m.setDate(now.getDate()-now.getDay()+1+(w*7));return m.toISOString().slice(0,10);}
 function WKL(w){if(w===0)return 'שבוע נוכחי';if(w===-1)return 'שבוע שעבר';if(w<0)return 'לפני '+Math.abs(w)+' שבועות';return 'שבוע +'+w;}
 function c1RM(w,r){if(!w||!r||r<=0)return 0;return Math.round(w*(1+r/30)*10)/10;}
@@ -1806,13 +1810,13 @@ function selMth(id){
   var b=document.getElementById('mBox');if(b){b.style.display='block';b.textContent=SMTH.name+' — '+SMTH.desc;}
 }
 function addEP(){
-  if(!SEX||!SMTH){alert('בחר תרגיל ושיטת עבודה');return;}
+  if(!SEX){alert('בחר תרגיל');return;}
   var bday=document.getElementById('bDay');
   var dayIdx=bday?parseInt(bday.value):0;var p=LP();
   var bsets=document.getElementById('bSets');var breps=document.getElementById('bReps');
   p.push({day:dayIdx,name:SEX.name,muscle:SEX.m,v:SEX.v||'',
     sets:bsets?bsets.value:'3',reps:breps?breps.value:'8-12',
-    mid:SMTH.id,mname:SMTH.name,mdesc:SMTH.desc,rest:SMTH.rest,id:Date.now()});
+    mid:SMTH?SMTH.id:'',mname:SMTH?SMTH.name:'',mdesc:SMTH?SMTH.desc:'',rest:SMTH?SMTH.rest:'2 דקות',id:Date.now()});
   SaveP(p);SEX=null;SMTH=null;
   var ee=document.getElementById('exExtra');if(ee)ee.style.display='none';
   renderEL();rendPlan();
@@ -1822,13 +1826,15 @@ function rendPlan(){
   var el=document.getElementById('planView');if(!el)return;
   el.innerHTML=GDN(n).map(function(dn,di){
     var exs=p.filter(function(e){return e.day===di;});
-    var h='<div class="day-block"><div class="day-hd"><span style="font-size:13px;font-weight:700;">'+dn+'</span><span style="font-size:11px;color:var(--g2);">'+exs.length+' תרגילים</span></div>';
+    var h='<div class="day-block"><div class="day-hd" style="align-items:center;">'+
+      '<input type="text" value="'+dn+'" data-di="'+di+'" onchange="saveDayName(parseInt(this.dataset.di),this.value);rendPlan();" style="font-size:13px;font-weight:700;background:none;border:none;border-bottom:1px solid var(--bdr);color:var(--txt);width:120px;padding:2px 4px;">'+
+      '<span style="font-size:11px;color:var(--g2);">'+exs.length+' תרגילים</span></div>';
     exs.forEach(function(ex){
       h+='<div class="ex-row"><div style="display:flex;justify-content:space-between;"><span style="font-size:12px;font-weight:700;">'+ex.name+'</span>'+
-        '<button class="delb" data-id="'+ex.id+'" onclick="delEP(parseInt(this.dataset.id))">✕</button></div>'+
+        '<button class="delb" data-id="'+ex.id+'" onclick="delEP(parseInt(this.dataset.id))"></button></div>'+
         '<div style="font-size:11px;color:var(--g2);">'+ex.sets+' סטים · '+ex.reps+' · '+ex.rest+
         (ex.v?' · <a href="'+ex.v+'" target="_blank" style="color:var(--teal);">סרטון</a>':'')+
-        '</div><div style="font-size:11px;color:var(--teal);">'+ex.mname+' — '+ex.mdesc+'</div></div>';
+        '</div>'+(ex.mname?'<div style="font-size:11px;color:var(--teal);">'+ex.mname+(ex.mdesc?' — '+ex.mdesc:'')+'</div>':'')+'</div>';
     });
     if(!exs.length)h+='<div style="font-size:11px;color:var(--g2);">אין תרגילים</div>';
     h+='</div>';return h;
@@ -1842,7 +1848,7 @@ function rendWD(){
   var dbb=document.getElementById('dayBtns');if(!dbb)return;
   dbb.innerHTML=ns.map(function(d,i){
     var done=(ld('log_'+wk+'_'+i)||{})['_done'];
-    return '<button class="dbb'+(i===CD?' on':'')+(done?' dn':'')+'" data-i="'+i+'" onclick="selD(parseInt(this.dataset.i))">'+d+(done?' ✓':'')+'</button>';
+    return '<button class="dbb'+(i===CD?' on':'')+(done?' dn':'')+'" data-i="'+i+'" onclick="selD(parseInt(this.dataset.i))">'+d+(done?' ':'')+'</button>';
   }).join('');
   rendQ();
 }
@@ -1875,7 +1881,7 @@ function rendQ(){
     '</div></div>'+
     '<div style="margin-bottom:8px;"><label style="font-weight:700;color:var(--w);font-size:12px;">תחושה?</label>'+
     '<div class="qopts">'+fl.map(function(f){return '<button class="qopt'+(QA.feel===f?' on':'')+'" data-f="feel" data-v="'+f+'" onclick="setQ(this)">'+f+'</button>';}).join('')+'</div></div>'+
-    '<button class="btn btn-p" onclick="subQ()">התחל אימון 💪</button></div>';
+    '<button class="btn btn-p" onclick="subQ()">התחל אימון </button></div>';
   qa.innerHTML=h;
   var wv=document.getElementById('wView');if(wv)wv.innerHTML='';
 }
@@ -1898,7 +1904,7 @@ function rendW(){
     var lk='log_'+wk+'_'+CD;var logs=ld(lk)||{};var el=logs[ex.id]||{sets:[],notes:'',vu:''};
     var pl=(ld('log_'+pwk+'_'+CD)||{})[ex.id];
     h+='<div class="wcard"><div style="font-size:13px;font-weight:700;">'+ex.name+'</div>'+
-      '<div style="font-size:10px;color:var(--g2);margin:2px 0 6px;">'+ex.sets+' סטים · '+ex.reps+' · '+ex.mname+' · '+ex.rest+
+      '<div style="font-size:10px;color:var(--g2);margin:2px 0 6px;">'+ex.sets+' סטים · '+ex.reps+(ex.mname?' · '+ex.mname:'')+' · '+ex.rest+
       (ex.v?' · <a href="'+ex.v+'" target="_blank" style="color:var(--teal);font-size:10px;">הדגמה</a>':'')+
       '</div>';
     if(pl&&pl.sets&&pl.sets.some(function(s){return s.w||s.r;})){
@@ -1911,19 +1917,19 @@ function rendW(){
     h+='<div style="display:grid;grid-template-columns:28px 1fr 1fr auto;gap:5px;margin-bottom:4px;">'+
       '<div></div><div style="text-align:center;font-size:10px;color:var(--g2);">משקל</div>'+
       '<div style="text-align:center;font-size:10px;color:var(--g2);">חזרות</div>'+
-      '<div style="text-align:center;font-size:10px;color:var(--g2);">✓</div></div>';
+      '<div style="text-align:center;font-size:10px;color:var(--g2);"></div></div>';
     for(var s=0;s<(parseInt(ex.sets)||3);s++){
       var sd=el.sets[s]||{};
       h+='<div class="sg"><div class="sl">סט '+(s+1)+'</div>'+
         '<input type="number" value="'+(sd.w||'')+'" placeholder="0" step="0.5" min="0" style="text-align:center;" data-eid="'+ex.id+'" data-lk="'+lk+'" data-si="'+s+'" data-fld="w" oninput="svS(this)">'+
         '<input type="number" value="'+(sd.r||'')+'" placeholder="0" min="0" style="text-align:center;" data-eid="'+ex.id+'" data-lk="'+lk+'" data-si="'+s+'" data-fld="r" oninput="svS(this)">'+
-        '<button onclick="startRest('+restSecs+')" style="background:var(--teal);border:none;border-radius:8px;color:#fff;font-size:11px;font-weight:700;padding:4px 6px;cursor:pointer;">✓</button>'+
+        '<button onclick="startRest('+restSecs+')" style="background:var(--teal);border:none;border-radius:8px;color:#fff;font-size:11px;font-weight:700;padding:4px 6px;cursor:pointer;"></button>'+
         '</div>';
     }
     h+='<textarea class="nta" placeholder="הערות..." data-eid="'+ex.id+'" data-lk="'+lk+'" oninput="svN(this)">'+(el.notes||'')+'</textarea>';
     h+='</div>';
   });
-  h+='<button class="btn btn-p" style="margin-top:8px;" onclick="markD()">סיים אימון ✓</button>';
+  h+='<button class="btn btn-p" style="margin-top:8px;" onclick="markD()">סיים אימון </button>';
   wv.innerHTML=h;
 }
 function svS(el){
@@ -2059,7 +2065,7 @@ function rendCIPhotos(){
   var h='';
   CI_PHOTOS.forEach(function(p,i){
     h+='<div style="position:relative;"><img class="photo-thumb" src="'+p+'">'+
-      '<button onclick="removePhoto('+i+')" style="position:absolute;top:2px;right:2px;background:rgba(0,0,0,.6);border:none;color:#fff;border-radius:50%;width:18px;height:18px;font-size:11px;cursor:pointer;">✕</button></div>';
+      '<button onclick="removePhoto('+i+')" style="position:absolute;top:2px;right:2px;background:rgba(0,0,0,.6);border:none;color:#fff;border-radius:50%;width:18px;height:18px;font-size:11px;cursor:pointer;"></button></div>';
   });
   el.innerHTML=h;
   var btn=document.getElementById('ciUploadBtn');
@@ -2096,11 +2102,13 @@ function submitCI(){
   var cisCloud=cis.map(function(c){return Object.assign({},c,{photos:[]});});
   if(idx>=0)cisCloud[idx]=ciCloud;else cisCloud.push(ciCloud);
   gsvk(key,cisCloud);
-  alert('סיכום שבועי נשלח! 🎉');
-  // clear form
+  alert('סיכום שבועי נשמר!');
   CI_PHOTOS=[];rendCIPhotos();
   document.getElementById('ciProgress').value='';
   document.getElementById('ciText').value='';
+  rendCIHist();
+  var histTab=document.getElementById('acit2');
+  if(histTab)histTab.click();
 }
 function rendCIHist(){
   var key='mc3_'+ATH_ID+'_checkins';
@@ -2122,7 +2130,7 @@ function rendCIHist(){
     h+='<div class="stat"><div class="lbl">חלבון</div><div class="val" style="font-size:14px;color:var(--teal);">'+(ci.avgProt||'---')+'ג</div></div>';
     h+='</div>';
     var scores=ci.scores||{};
-    var labels={nut:'תזונה 🍽️',trn:'אימונים 🏋️',slp:'שינה 😴',rec:'התאוששות ⚡',hun:'רעב 🍩'};
+    var labels={nut:'תזונה ',trn:'אימונים ',slp:'שינה ',rec:'התאוששות ',hun:'רעב '};
     h+='<div style="margin-bottom:8px;">';
     Object.keys(labels).forEach(function(k){
       if(scores[k]){
@@ -2137,7 +2145,20 @@ function rendCIHist(){
     });
     h+='</div>';
     if(ci.progress)h+='<div style="font-size:12px;margin-bottom:6px;"><strong>אימונים:</strong> '+ci.progress+'</div>';
-    if(ci.text)h+='<div style="font-size:12px;color:var(--g1);">'+ci.text+'</div>';
+    if(ci.text)h+='<div style="font-size:12px;color:var(--g1);margin-bottom:10px;">'+ci.text+'</div>';
+    // WhatsApp button
+    var waMsg='*סיכום שבועי - שבוע '+ci.weekLabel+'*\n\n';
+    if(ci.avgCals)waMsg+='קלוריות ממוצע: '+ci.avgCals+'\n';
+    if(ci.avgProt)waMsg+='חלבון ממוצע: '+ci.avgProt+'ג\n';
+    if(ci.avgSteps)waMsg+='צעדים ממוצע: '+ci.avgSteps+'\n';
+    var sc=ci.scores||{};
+    var slbls={nut:'תזונה',trn:'אימונים',slp:'שינה',rec:'התאוששות',hun:'רעב'};
+    Object.keys(slbls).forEach(function(k){if(sc[k])waMsg+=slbls[k]+': '+sc[k]+'/10\n';});
+    if(ci.progress)waMsg+='\nאימונים: '+ci.progress;
+    if(ci.text)waMsg+='\n\nהערות: '+ci.text;
+    waMsg+='\n\n_Ohad Meir Coaching_';
+    var waUrl='https://api.whatsapp.com/send?text='+encodeURIComponent(waMsg);
+    h+='<a href="'+waUrl+'" target="_blank" rel="noopener" class="btn btn-p" style="display:block;text-align:center;text-decoration:none;font-size:13px;">שלח למאמן בWhatsApp</a>';
     h+='</div>';
   });
   el.innerHTML=h;
@@ -2157,8 +2178,8 @@ function rendAthMtg(){
     h+='<div class="mtg-card'+(m.date>=today&&m.date<=new Date(Date.now()+7*86400000).toISOString().slice(0,10)?' soon':'')+'" style="opacity:'+(past?'.5':'1')+'">';
     h+='<div style="display:flex;justify-content:space-between;align-items:flex-start;">';
     h+='<div><div class="mtg-date" style="font-size:20px;">'+parseInt(p[2])+'/'+parseInt(p[1])+'/'+p[0]+'</div>';
-    h+='<div style="font-size:13px;font-weight:700;">🕐 '+m.time+'</div>';
-    h+='<div style="font-size:12px;color:var(--g1);">⏱ '+m.duration+' דקות · 📍 '+m.location+'</div></div>';
+    h+='<div style="font-size:13px;font-weight:700;"> '+m.time+'</div>';
+    h+='<div style="font-size:12px;color:var(--g1);">⏱ '+m.duration+' דקות ·  '+m.location+'</div></div>';
     if(past)h+='<span style="font-size:11px;color:var(--g2);">הסתיים</span>';
     else h+='<span class="badge badge-t">קרוב</span>';
     h+='</div></div>';
@@ -2436,7 +2457,7 @@ function rendMeasureTable(){
       h+='<td style="padding:5px 8px;text-align:center;white-space:nowrap;color:'+(v!==null&&v!==undefined?'var(--w)':'var(--g2)')+';">'+(v!==null&&v!==undefined?v:'—')+'</td>';
     });
     h+='<td style="padding:5px 8px;text-align:center;font-weight:700;color:'+dwColor+';">'+(dw!==null?(dw>0?'+':'')+dw+'kg':'—')+'</td>';
-    if(ROLE==='coach')h+='<td style="padding:5px 8px;text-align:center;"><button onclick="delMeasure(\''+m.date+'\')" style="background:none;border:none;color:var(--g2);cursor:pointer;font-size:14px;">🗑</button></td>';
+    if(ROLE==='coach')h+='<td style="padding:5px 8px;text-align:center;"><button onclick="delMeasure(\''+m.date+'\')" style="background:none;border:none;color:var(--g2);cursor:pointer;font-size:14px;"></button></td>';
     h+='</tr>';
   });
   h+='</tbody></table></div>';
@@ -2480,7 +2501,7 @@ function buildBodyHTML(){
           '<div><label>רגל ימין</label><input type="number" id="mCirLegR" step="0.5" placeholder="57"></div>'+
           '<div><label>רגל שמאל</label><input type="number" id="mCirLegL" step="0.5" placeholder="56"></div>'+
         '</div>'+
-        '<button class="btn btn-p" onclick="saveMeasurement()" style="width:100%">💾 שמור מדידה</button>'+
+        '<button class="btn btn-p" onclick="saveMeasurement()" style="width:100%"> שמור מדידה</button>'+
       '</div>'+
     '</div>';
   }
@@ -2499,7 +2520,7 @@ function toggleMeasureForm(){
   if(!f||!btn)return;
   var open=f.style.display!=='none';
   f.style.display=open?'none':'block';
-  btn.textContent=open?'+ הוסף מדידה חדשה':'✕ סגור';
+  btn.textContent=open?'+ הוסף מדידה חדשה':' סגור';
   if(!open){
     document.getElementById('mDate').value=new Date().toISOString().slice(0,10);
   }
@@ -2606,7 +2627,7 @@ function rendHome(){
   var nextMtg=mtgs.find(function(m){return m.date>=td();});
 
   var h='<div style="padding:4px 0 12px;">';
-  h+='<div style="font-size:20px;font-weight:800;margin-bottom:4px;">שלום, '+(ath.name||'')+'! 💪</div>';
+  h+='<div style="font-size:20px;font-weight:800;margin-bottom:4px;">שלום, '+(ath.name||'')+'! </div>';
   h+='<div style="font-size:12px;color:var(--g1);margin-bottom:16px;">'+new Date().toLocaleDateString('he-IL',{weekday:'long',day:'numeric',month:'long'})+'</div>';
 
   // Program progress bar
@@ -2762,7 +2783,7 @@ async function saveTip(){
       });
       if(!startR.ok)throw new Error(await startR.text());
       var startJ=await startR.json();
-      var uploadId=startJ.uploadId, key=startJ.key;
+      var uploadId=startJ.uploadId, key=startJ.key, pathname=startJ.pathname;
 
       var parts=[], partNum=0, offset=0;
       var total=file.size;
@@ -2777,6 +2798,7 @@ async function saveTip(){
             'x-upload-action':'part',
             'x-upload-id':uploadId,
             'x-upload-key':key,
+            'x-pathname':pathname,
             'x-part-number':String(partNum),
             'content-type':'application/octet-stream'
           },
@@ -2791,7 +2813,7 @@ async function saveTip(){
       var compR=await fetch('/api/upload',{
         method:'POST',
         headers:{'x-upload-action':'complete','content-type':'application/json'},
-        body:JSON.stringify({uploadId:uploadId,key:key,parts:parts})
+        body:JSON.stringify({uploadId:uploadId,key:key,pathname:pathname,parts:parts})
       });
       if(!compR.ok)throw new Error(await compR.text());
       url=(await compR.json()).url;
@@ -2819,7 +2841,7 @@ function rendCoachTips(){
   var tips=loadTips();
   if(!tips.length){el.innerHTML='<div class="empty">אין מדריכים עדיין</div>';return;}
   el.innerHTML=tips.map(function(t){
-    var icon=t.type&&t.type.includes('pdf')?'📄':'🖼️';
+    var icon=t.type&&t.type.includes('pdf')?'':'';
     var link=t.url||t.data||'';
     var sz=t.size?(t.size>1024*1024?(Math.round(t.size/1024/1024*10)/10+'MB'):(Math.round(t.size/1024)+'KB')):'';
     return '<div class="card" style="display:flex;align-items:center;gap:10px;padding:12px;">'+
@@ -2827,7 +2849,7 @@ function rendCoachTips(){
       '<div style="flex:1;"><div style="font-size:13px;font-weight:700;">'+t.name+'</div>'+
       '<div style="font-size:11px;color:var(--g1);">'+t.cat+(sz?' · '+sz:'')+'</div></div>'+
       '<a href="'+link+'" target="_blank" style="color:var(--teal);font-size:20px;text-decoration:none;">⬇</a>'+
-      '<button onclick="delTip('+t.id+')" style="background:none;border:none;color:var(--g2);font-size:18px;cursor:pointer;">🗑</button>'+
+      '<button onclick="delTip('+t.id+')" style="background:none;border:none;color:var(--g2);font-size:18px;cursor:pointer;"></button>'+
       '</div>';
   }).join('');
 }
@@ -2836,7 +2858,7 @@ function rendAthTips(){
   var tips=loadTips();
   if(!tips.length){el.innerHTML='<div class="empty">אין מדריכים עדיין</div>';return;}
   el.innerHTML=tips.map(function(t){
-    var icon=t.type&&t.type.includes('pdf')?'📄':'🖼️';
+    var icon=t.type&&t.type.includes('pdf')?'':'';
     return '<div class="card" style="display:flex;align-items:center;gap:10px;padding:12px;" onclick="openTip(\''+t.id+'\')">'+
       '<span style="font-size:22px;">'+icon+'</span>'+
       '<div style="flex:1;"><div style="font-size:13px;font-weight:700;">'+t.name+'</div>'+
@@ -2861,14 +2883,14 @@ function buildCoachNutPlanHTML(){
     '<div class="ct" style="margin-bottom:8px;">תפריט אישי למתאמן</div>'+
     '<div style="margin-bottom:8px;"><label style="font-size:11px;color:var(--g1);">הנחיות / תפריט חופשי</label>'+
     '<textarea id="nutPlanText" style="height:100px;width:100%;font-size:12px;" placeholder="רשום תפריט יומי, כמויות, הנחיות...">'+( p.text||'')+'</textarea></div>'+
-    '<button class="btn btn-p" onclick="saveCoachNutPlan()" style="width:100%">💾 שמור תפריט</button>'+
+    '<button class="btn btn-p" onclick="saveCoachNutPlan()" style="width:100%"> שמור תפריט</button>'+
     '</div>';
 }
 function saveCoachNutPlan(){
   var t=document.getElementById('nutPlanText');
   if(!t)return;
   saveNutPlanData({text:t.value});
-  var btn=t.nextElementSibling;if(btn){var orig=btn.textContent;btn.textContent='✓ נשמר!';setTimeout(function(){btn.textContent=orig;},1500);}
+  var btn=t.nextElementSibling;if(btn){var orig=btn.textContent;btn.textContent=' נשמר!';setTimeout(function(){btn.textContent=orig;},1500);}
 }
 function rendNutPlan(){
   var el=document.getElementById('athNutPlanView');if(!el)return;
