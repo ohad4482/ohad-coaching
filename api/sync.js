@@ -15,6 +15,7 @@ module.exports = async function handler(req, res) {
   )`;
 
   if (req.method === 'GET') {
+    res.setHeader('Cache-Control', 'no-store');
     const rows = await sql`SELECT key, value FROM app_data`;
     const data = {};
     rows.forEach(r => data[r.key] = r.value);
