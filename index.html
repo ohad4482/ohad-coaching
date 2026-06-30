@@ -961,7 +961,7 @@ function openAddAthlete(){
     '<div style="margin-bottom:8px;"><label>מטרה כללית</label><input type="text" id="mAthGoal" placeholder="ירידה במשקל, עלייה במסה..."></div>'+
     '<div class="r2" style="margin-bottom:8px;gap:8px;">'+
       '<div><label>תחילת תוכנית</label><input type="date" id="mAthStart"></div>'+
-      '<div><label>חודשים</label><input type="number" id="mAthMonths" placeholder="3" min="1" max="24"></div>'+
+      '<div><label>סיום תוכנית</label><input type="date" id="mAthEnd"></div>'+
     '</div>'+
     '<div style="margin-bottom:14px;"><label>יעד צעדים יומי</label><input type="number" id="mAthStepsGoal" placeholder="10000" min="1000" max="30000"></div>'+
     '<button class="btn btn-p" onclick="saveNewAthlete()">שמור מתאמן</button>');
@@ -981,9 +981,9 @@ function saveNewAthlete(){
   var activityLevel=parseFloat(document.getElementById('mAthActivity').value)||1.55;
   var goal=document.getElementById('mAthGoal').value.trim();
   var startDate=document.getElementById('mAthStart').value||td();
-  var months=parseInt(document.getElementById('mAthMonths').value)||3;
+  var endDate=document.getElementById('mAthEnd').value||'';
   var stepsGoal=parseInt(document.getElementById('mAthStepsGoal').value)||0;
-  aths.push({id:id,name:name,username:user,password:pwd,phone:phone,gender:gender,age:age,height:height,activityLevel:activityLevel,goal:goal,startDate:startDate,months:months,stepsGoal:stepsGoal||0});
+  aths.push({id:id,name:name,username:user,password:pwd,phone:phone,gender:gender,age:age,height:height,activityLevel:activityLevel,goal:goal,startDate:startDate,endDate:endDate,stepsGoal:stepsGoal||0});
   saveAths(aths);
   // Initialize fresh empty data for new athlete
   localStorage.setItem('mc3_'+id+'_checkins',JSON.stringify([]));
@@ -1012,7 +1012,7 @@ function openEditAthlete(){
     '<div style="margin-bottom:8px;"><label>מטרה כללית</label><input type="text" id="mAthGoal" value="'+(ath.goal||'')+'" placeholder="ירידה במשקל..."></div>'+
     '<div class="r2" style="margin-bottom:8px;gap:8px;">'+
       '<div><label>תחילת תוכנית</label><input type="date" id="mAthStart" value="'+(ath.startDate||td())+'"></div>'+
-      '<div><label>חודשים</label><input type="number" id="mAthMonths" value="'+(ath.months||3)+'" min="1" max="24"></div>'+
+      '<div><label>סיום תוכנית</label><input type="date" id="mAthEnd" value="'+(ath.endDate||'')+'"></div>'+
     '</div>'+
     '<div style="margin-bottom:14px;"><label>יעד צעדים יומי</label><input type="number" id="mAthStepsGoal" value="'+(ath.stepsGoal||'')+'" placeholder="10000" min="1000" max="30000"></div>'+
     '<button class="btn btn-p" onclick="saveEditAthlete()">שמור שינויים</button>');
@@ -1035,7 +1035,7 @@ function saveEditAthlete(){
   aths[idx].activityLevel=parseFloat(document.getElementById('mAthActivity').value)||aths[idx].activityLevel||1.55;
   aths[idx].goal=document.getElementById('mAthGoal').value.trim();
   var startEl=document.getElementById('mAthStart');if(startEl&&startEl.value)aths[idx].startDate=startEl.value;
-  var monEl=document.getElementById('mAthMonths');if(monEl&&monEl.value)aths[idx].months=parseInt(monEl.value)||3;
+  var endEl=document.getElementById('mAthEnd');if(endEl)aths[idx].endDate=endEl.value||'';
   var sgEl=document.getElementById('mAthStepsGoal');if(sgEl)aths[idx].stepsGoal=parseInt(sgEl.value)||0;
   saveAths(aths);closeModal();
   document.getElementById('athDetailName').textContent=name;
@@ -3301,7 +3301,8 @@ function saveMeasurement(){
     cirArmL:parseFloat(document.getElementById('mCirArmL').value)||null,
     cirLegR:parseFloat(document.getElementById('mCirLegR').value)||null,
     cirLegL:parseFloat(document.getElementById('mCirLegL').value)||null,
-    cirGlutes:parseFloat(document.getElementById('mCirGlutes').value)||null
+    cirGlutes:parseFloat(document.getElementById('mCirGlutes').value)||null,
+    meetingNotes:(document.getElementById('mMeetingNotes')?document.getElementById('mMeetingNotes').value.trim():'')||null
   };
   var arr=loadMeasures();
   var idx=arr.findIndex(function(x){return x.date===date;});
@@ -3316,6 +3317,13 @@ function delMeasure(date){
   if(!confirm('למחוק מדידה מ-'+date+'?'))return;
   saveMeasures(loadMeasures().filter(function(x){return x.date!==date;}));
   rendMeasureTable();
+}
+function saveMeasureNote(date,text){
+  var arr=loadMeasures();
+  var m=arr.find(function(x){return x.date===date;});
+  if(!m)return;
+  m.meetingNotes=text.trim()||null;
+  saveMeasures(arr);
 }
 function rendMeasureTable(){
   var el=document.getElementById('measureTable');if(!el)return;
@@ -3343,6 +3351,7 @@ function rendMeasureTable(){
   h+='<thead><tr style="background:var(--surf2);">';
   cols.forEach(function(c){h+='<th style="padding:6px 8px;text-align:center;white-space:nowrap;border-bottom:1px solid var(--bdr);color:var(--g1);">'+c.l+'</th>';});
   h+='<th style="padding:6px 8px;border-bottom:1px solid var(--bdr);color:var(--g1);">Δ משקל</th>';
+  h+='<th style="padding:6px 8px;border-bottom:1px solid var(--bdr);color:var(--g1);min-width:160px;">סיכום פגישה</th>';
   if(ROLE==='coach')h+='<th style="padding:6px 8px;border-bottom:1px solid var(--bdr);">מחק</th>';
   h+='</tr></thead><tbody>';
   arr.slice().reverse().forEach(function(m,i){
@@ -3355,7 +3364,14 @@ function rendMeasureTable(){
       h+='<td style="padding:5px 8px;text-align:center;white-space:nowrap;color:'+(v!==null&&v!==undefined?'var(--w)':'var(--g2)')+';">'+(v!==null&&v!==undefined?v:'—')+'</td>';
     });
     h+='<td style="padding:5px 8px;text-align:center;font-weight:700;color:'+dwColor+';">'+(dw!==null?(dw>0?'+':'')+dw+'kg':'—')+'</td>';
-    if(ROLE==='coach')h+='<td style="padding:5px 8px;text-align:center;"><button onclick="delMeasure(\''+m.date+'\')" style="background:none;border:none;color:var(--g2);cursor:pointer;font-size:14px;"></button></td>';
+    // meeting notes — editable inline for coach
+    var notes=m.meetingNotes||'';
+    if(ROLE==='coach'){
+      h+='<td style="padding:4px 6px;"><textarea onchange="saveMeasureNote(\''+m.date+'\',this.value)" style="width:100%;min-width:140px;font-size:11px;background:var(--surf2);border:1px solid var(--bdr);border-radius:6px;color:var(--w);padding:4px;resize:vertical;min-height:36px;font-family:inherit;" placeholder="הוסף סיכום...">'+notes.replace(/</g,'&lt;')+'</textarea></td>';
+      h+='<td style="padding:5px 8px;text-align:center;"><button onclick="delMeasure(\''+m.date+'\')" style="background:none;border:none;color:var(--g2);cursor:pointer;font-size:14px;"></button></td>';
+    } else {
+      h+='<td style="padding:5px 8px;font-size:11px;color:'+(notes?'var(--w)':'var(--g2)')+';">'+(notes||'—')+'</td>';
+    }
     h+='</tr>';
   });
   h+='</tbody></table></div>';
@@ -3437,6 +3453,7 @@ function buildBodyHTML(){
         +'<div><label>רגל ימין</label><input type="number" id="mCirLegR" step="0.5" placeholder="57"></div>'
         +'<div><label>רגל שמאל</label><input type="number" id="mCirLegL" step="0.5" placeholder="56"></div>'
       +'</div>'
+      +(ROLE==='coach'?'<div style="margin-bottom:12px;"><label>סיכום פגישה</label><textarea id="mMeetingNotes" placeholder="נקודות חשובות מהפגישה: יעדים, תצפיות, החלטות..." style="width:100%;min-height:80px;resize:vertical;font-family:inherit;font-size:13px;"></textarea></div>':'')
       +'<button class="btn btn-p" onclick="saveMeasurement()" style="width:100%"> שמור מדידה</button>'
     +'</div>'
   +'</div>';
@@ -3585,14 +3602,18 @@ async function syncFromCloud(){
 
 // ===== HOME SCREEN =====
 function progPct(ath){
-  if(!ath||!ath.startDate||!ath.months)return null;
+  if(!ath||!ath.startDate)return null;
   var start=new Date(ath.startDate);
-  var total=ath.months*30;
+  var end=ath.endDate?new Date(ath.endDate):null;
+  // fallback: support legacy 'months' field
+  if(!end&&ath.months){end=new Date(start);end.setDate(end.getDate()+ath.months*30);}
+  if(!end)return null;
+  var total=Math.floor((end-start)/(1000*60*60*24));
+  if(total<=0)return null;
   var elapsed=Math.floor((new Date()-start)/(1000*60*60*24));
   var pct=Math.min(100,Math.max(0,Math.round(elapsed/total*100)));
   var remaining=Math.max(0,total-elapsed);
-  var endDate=new Date(start);endDate.setDate(endDate.getDate()+total);
-  return {pct:pct,remaining:remaining,endDate:endDate.toISOString().slice(0,10),elapsed:elapsed,total:total};
+  return {pct:pct,remaining:remaining,endDate:end.toISOString().slice(0,10),elapsed:elapsed,total:total};
 }
 function _navIcon(id){
   var nb=document.getElementById('anb-'+id);
@@ -3910,7 +3931,8 @@ function rendProgBadge(ath){
   var prog=progPct(ath);
   if(!prog)return '';
   var barColor=prog.pct<50?'var(--teal)':prog.pct<80?'#f5a623':'#e05';
-  return '<div style="margin-top:6px;"><div style="display:flex;justify-content:space-between;font-size:10px;color:var(--g1);margin-bottom:2px;"><span>תוכנית: '+ath.months+' חודשים</span><span>'+prog.pct+'%</span></div>'+
+  var endLabel=prog.endDate?prog.endDate.slice(5).split('-').reverse().join('/'):'';
+  return '<div style="margin-top:6px;"><div style="display:flex;justify-content:space-between;font-size:10px;color:var(--g1);margin-bottom:2px;"><span>סיום: '+endLabel+'</span><span>'+prog.pct+'%</span></div>'+
     '<div style="height:5px;background:var(--bdr2);border-radius:3px;overflow:hidden;">'+
     '<div style="height:100%;width:'+prog.pct+'%;background:'+barColor+';border-radius:3px;"></div></div>'+
     '<div style="font-size:10px;color:var(--g2);text-align:left;margin-top:1px;">'+prog.remaining+' ימים נותרו</div></div>';
