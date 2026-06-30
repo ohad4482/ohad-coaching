@@ -52,6 +52,7 @@ textarea{resize:none;}
 input[type=range]{padding:0;background:transparent;border:none;accent-color:var(--teal);}
 input[type=number]{-moz-appearance:textfield;}
 input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;}
+input.ph-prev::placeholder{color:rgba(160,165,185,0.7);font-style:italic;}
 .r2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;}
 .r3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:8px;}
 .r4{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px;}
@@ -3485,7 +3486,35 @@ function toggleMeasureForm(){
   btn.textContent=open?'+ הוסף מדידה חדשה':' סגור';
   if(!open){
     document.getElementById('mDate').value=new Date().toISOString().slice(0,10);
+    _prefillMeasureForm();
   }
+}
+function _prefillMeasureForm(){
+  var arr=loadMeasures();
+  if(!arr.length)return;
+  var last=arr[arr.length-1];
+  var fields=[
+    ['mWeight','weight'],
+    ['mCalBic','calBic'],['mCalTri','calTri'],['mCalSub','calSub'],['mCalSup','calSup'],
+    ['mCirChest','cirChest'],['mCirWaist','cirWaist'],['mCirNavel','cirNavel'],
+    ['mCirArmR','cirArmR'],['mCirArmL','cirArmL'],
+    ['mCirLegR','cirLegR'],['mCirLegL','cirLegL'],['mCirGlutes','cirGlutes']
+  ];
+  fields.forEach(function(pair){
+    var el=document.getElementById(pair[0]);
+    if(!el)return;
+    var v=last[pair[1]];
+    if(v!==null&&v!==undefined){
+      el.placeholder=String(v);
+      el.style.color='';
+      el.value='';
+    }
+  });
+  // style placeholders dark gray via a class
+  document.querySelectorAll('#mForm input[type="number"]').forEach(function(el){
+    el.classList.add('ph-prev');
+  });
+  onCaliperChange();
 }
 function coachAthSub(id,el){
   var parent=el.closest('.tabs');
