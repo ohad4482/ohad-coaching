@@ -99,11 +99,21 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
 .mtg-card{background:var(--card);border:1px solid var(--bdr);border-radius:var(--r);padding:14px 16px;margin-bottom:8px;}
 .mtg-card.soon{border-color:var(--teal);background:var(--tglow2);}
 .mtg-date{font-size:26px;font-weight:900;color:var(--teal);letter-spacing:-.5px;}
-.food-li{padding:10px 14px;border-bottom:1px solid var(--bdr);display:flex;justify-content:space-between;align-items:center;cursor:pointer;background:var(--surf);transition:background .15s;}
-.food-li:hover,.food-li.on{background:var(--card);}
-.food-li.on{border-right:3px solid var(--teal);}
-.food-n{font-size:13px;font-weight:700;}
-.food-m{font-size:11px;color:var(--g2);}
+.food-li{padding:11px 14px;border-bottom:1px solid rgba(255,255,255,0.05);display:flex;align-items:center;cursor:pointer;gap:10px;transition:background .12s;-webkit-tap-highlight-color:transparent;}
+.food-li:last-child{border-bottom:none;}
+.food-li:active,.food-li.on{background:rgba(42,172,160,0.08);}
+.food-cat-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.food-info{flex:1;min-width:0;}
+.food-n{font-size:13px;font-weight:600;color:#E2E4EE;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.food-m{font-size:11px;color:var(--g2);margin-top:2px;display:flex;gap:6px;}
+.food-mac-pill{color:var(--g1);}
+.food-kcal{text-align:left;flex-shrink:0;min-width:44px;}
+.food-kcal-v{font-size:17px;font-weight:700;color:var(--ok);line-height:1;}
+.food-kcal-u{font-size:9px;color:var(--g2);text-align:center;}
+.food-sec-hdr{font-size:10px;font-weight:700;letter-spacing:.08em;color:var(--g2);text-transform:uppercase;padding:8px 14px 5px;background:rgba(0,0,0,0.3);}
+.food-qty-btns{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px;}
+.food-qty-btn{padding:5px 10px;border-radius:20px;font-size:12px;border:1px solid var(--bdr2);background:transparent;color:var(--g1);cursor:pointer;font-family:'Inter',sans-serif;transition:all .15s;}
+.food-qty-btn.on,.food-qty-btn:active{background:var(--teal);border-color:var(--teal);color:#fff;}
 .meal-blk{background:var(--surf);border-radius:var(--rs);padding:10px 12px;margin-bottom:8px;border:1px solid var(--bdr);}
 .meal-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--bdr);font-size:12px;}
 .meal-row:last-child{border-bottom:none;}
@@ -183,7 +193,7 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
 .exi.on{border-right:3px solid var(--teal);}
 .en{font-size:13px;font-weight:600;}
 .em{font-size:10px;color:var(--g2);}
-.flist{max-height:175px;overflow-y:auto;border:1px solid var(--bdr);border-radius:var(--rs);margin-bottom:8px;}
+.flist{max-height:260px;overflow-y:auto;border:1px solid var(--bdr);border-radius:14px;margin-bottom:8px;background:var(--surf);}
 .fi{padding:9px 12px;cursor:pointer;border-bottom:1px solid var(--bdr);background:var(--surf);transition:background .15s;}
 .fi:last-child{border-bottom:none;}
 .fi:hover,.fi.on{background:var(--card);}
@@ -386,19 +396,26 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
         <div class="r4" id="nstats"></div>
         <div class="card">
           <div class="ct">הוסף מאכל</div>
-          <div class="r2" style="margin-bottom:6px;">
-            <div><label>ארוחה</label><select id="mealSl"><option>ארוחת בוקר</option><option>ארוחת ביניים 1</option><option>ארוחת צהריים</option><option>ארוחת ביניים 2</option><option>ארוחת ערב</option><option>לפני שינה</option></select></div>
-            <div><label>חיפוש</label><div style="display:flex;gap:6px;align-items:center;"><input type="text" id="fSearch" placeholder="חפש..." oninput="filterF()" style="flex:1;"><button onclick="openBarcodeScanner()" title="סרוק ברקוד" style="flex-shrink:0;background:rgba(42,172,160,0.15);border:1px solid rgba(42,172,160,0.4);border-radius:10px;padding:8px 10px;cursor:pointer;"><svg viewBox="0 0 24 24" width="18" height="18" stroke="#2AACA0" fill="none" stroke-width="1.8" stroke-linecap="round"><path d="M3 9V6a1 1 0 0 1 1-1h3M3 15v3a1 1 0 0 0 1 1h3M21 9V6a1 1 0 0 0-1-1h-3M21 15v3a1 1 0 0 1-1 1h-3"/><rect x="7" y="7" width="4" height="4" rx=".5"/><rect x="7" y="13" width="4" height="4" rx=".5"/><rect x="13" y="7" width="4" height="4" rx=".5"/><line x1="13" y1="13" x2="13" y2="17"/><line x1="17" y1="13" x2="17" y2="13"/><line x1="17" y1="17" x2="17" y2="17"/></svg></button></div></div>
-          </div>
-          <div class="chips" id="fcTabs"></div>
+          <div style="margin-bottom:10px;"><label>ארוחה</label><select id="mealSl"><option>ארוחת בוקר</option><option>ארוחת ביניים 1</option><option>ארוחת צהריים</option><option>ארוחת ביניים 2</option><option>ארוחת ערב</option><option>לפני שינה</option></select></div>
+          <div style="display:flex;gap:6px;align-items:center;margin-bottom:10px;"><input type="text" id="fSearch" placeholder="חפש מאכל, ירק, דג..." oninput="filterF()" style="flex:1;font-size:14px;padding:11px 14px;"><button onclick="openBarcodeScanner()" title="סרוק ברקוד" style="flex-shrink:0;background:rgba(42,172,160,0.15);border:1px solid rgba(42,172,160,0.4);border-radius:10px;padding:10px 12px;cursor:pointer;"><svg viewBox="0 0 24 24" width="18" height="18" stroke="#2AACA0" fill="none" stroke-width="1.8" stroke-linecap="round"><path d="M3 9V6a1 1 0 0 1 1-1h3M3 15v3a1 1 0 0 0 1 1h3M21 9V6a1 1 0 0 0-1-1h-3M21 15v3a1 1 0 0 1-1 1h-3"/><rect x="7" y="7" width="4" height="4" rx=".5"/><rect x="7" y="13" width="4" height="4" rx=".5"/><rect x="13" y="7" width="4" height="4" rx=".5"/><line x1="13" y1="13" x2="13" y2="17"/><line x1="17" y1="13" x2="17" y2="13"/><line x1="17" y1="17" x2="17" y2="17"/></svg></button></div>
+          <div class="chips" id="fcTabs" style="margin-bottom:8px;"></div>
           <div class="flist" id="fList"></div>
-          <div id="fQtyBox" style="display:none;" class="qtybox">
-            <div style="font-size:12px;font-weight:700;margin-bottom:6px;" id="fQtyName"></div>
-            <div class="r2">
-              <div><label>כמות (ג')</label><input type="number" id="fQty" value="100" min="1" step="5" oninput="updFQ()"></div>
-              <button class="btn btn-p" style="align-self:flex-end;" onclick="addFE()">+ הוסף</button>
+          <div id="fQtyBox" style="display:none;background:rgba(42,172,160,0.07);border:1px solid rgba(42,172,160,0.25);border-radius:14px;padding:14px;margin-top:8px;">
+            <div style="font-size:14px;font-weight:700;color:#E2E4EE;margin-bottom:10px;" id="fQtyName"></div>
+            <div class="food-qty-btns">
+              <button class="food-qty-btn" data-g="25" onclick="setFQty(25)">25ג'</button>
+              <button class="food-qty-btn" data-g="50" onclick="setFQty(50)">50ג'</button>
+              <button class="food-qty-btn on" data-g="100" onclick="setFQty(100)">100ג'</button>
+              <button class="food-qty-btn" data-g="150" onclick="setFQty(150)">150ג'</button>
+              <button class="food-qty-btn" data-g="200" onclick="setFQty(200)">200ג'</button>
+              <button class="food-qty-btn" data-g="250" onclick="setFQty(250)">250ג'</button>
             </div>
-            <div class="qtymac" id="fQtyMac"></div>
+            <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px;">
+              <input type="number" id="fQty" value="100" min="1" step="5" oninput="updFQ()" style="width:90px;flex-shrink:0;">
+              <span style="font-size:12px;color:var(--g2);">גרם</span>
+            </div>
+            <div class="qtymac" id="fQtyMac" style="display:flex;gap:12px;align-items:baseline;margin-bottom:12px;flex-wrap:wrap;"></div>
+            <button class="btn btn-p" onclick="addFE()">+ הוסף לרשימה</button>
           </div>
           <div style="margin-top:6px;"><span style="font-size:11px;color:var(--teal);cursor:pointer;text-decoration:underline;" onclick="togMF()">+ הזנה ידנית</span></div>
           <div id="mfForm" style="display:none;margin-top:8px;">
@@ -1610,60 +1627,156 @@ function rendSt(){
 }
 
 // ===== NUTRITION =====
+var _FCAT_COLOR={C:'#2AACA0',P:'#378ADD',V:'#2ECC87',F:'#FF6B6B',S:'#FF9F43',X:'#9B59B6',R:'#E67E22'};
 var FDB=[
-  {n:'חזה עוף',c:165,p:31,k:0,f:3.6,cat:'C'},{n:'שוק עוף',c:209,p:26,k:0,f:11,cat:'C'},
-  {n:'כנף עוף',c:203,p:24,k:0,f:11,cat:'C'},{n:'פילה עוף',c:120,p:23,k:0,f:2.5,cat:'C'},
-  {n:'הודו טחון',c:170,p:21,k:0,f:9,cat:'C'},{n:'חזה הודו',c:135,p:30,k:0,f:1,cat:'C'},
-  {n:'בקר טחון 80/20',c:215,p:26,k:0,f:12,cat:'C'},{n:'בקר טחון 90/10',c:176,p:27,k:0,f:7,cat:'C'},
-  {n:'סטייק אנטריקוט',c:271,p:26,k:0,f:18,cat:'C'},{n:'סטייק פילה',c:179,p:31,k:0,f:5,cat:'C'},
-  {n:'קציצות בקר',c:250,p:25,k:3,f:15,cat:'C'},{n:'כבד עוף',c:172,p:27,k:4,f:5,cat:'C'},
-  {n:'סלמון',c:208,p:20,k:0,f:13,cat:'C'},{n:'טונה בציר',c:116,p:26,k:0,f:1,cat:'C'},
-  {n:'טונה בשמן',c:198,p:29,k:0,f:9,cat:'C'},{n:'דג טילפיה',c:128,p:26,k:0,f:2.7,cat:'C'},
-  {n:'דג בקלה',c:105,p:23,k:0,f:0.9,cat:'C'},{n:'שרימפס',c:99,p:24,k:0,f:0.3,cat:'C'},
-  {n:'ביצה שלמה',c:155,p:13,k:1,f:11,cat:'C'},{n:'חלבון ביצה',c:52,p:11,k:0.7,f:0.2,cat:'C'},
-  {n:'קוטג 5%',c:82,p:10,k:3.5,f:3.5,cat:'C'},{n:'קוטג 3%',c:72,p:10,k:3.5,f:2,cat:'C'},
+  // חלבון - עוף ובשר
+  {n:'חזה עוף טרי',c:165,p:31,k:0,f:3.6,cat:'C'},{n:'חזה עוף מבושל/צלוי',c:185,p:35,k:0,f:4,cat:'C'},
+  {n:'ירך עוף ללא עצם',c:177,p:24,k:0,f:9,cat:'C'},{n:'שוק עוף',c:209,p:26,k:0,f:11,cat:'C'},
+  {n:'עוף טחון 93%',c:143,p:17,k:0,f:8.5,cat:'C'},{n:'כנף עוף',c:203,p:24,k:0,f:11,cat:'C'},
+  {n:'כבד עוף',c:172,p:27,k:4,f:5,cat:'C'},{n:'חזה הודו',c:135,p:30,k:0,f:1,cat:'C'},
+  {n:'הודו טחון',c:128,p:28,k:0,f:1.4,cat:'C'},{n:'בקר טחון 80/20',c:254,p:17,k:0,f:20,cat:'C'},
+  {n:'בקר טחון 90/10',c:176,p:20,k:0,f:10,cat:'C'},{n:'אנטרקוט (ריב-איי)',c:239,p:21,k:0,f:16,cat:'C'},
+  {n:'פילה בקר',c:187,p:28,k:0,f:8,cat:'C'},{n:'סינטה',c:213,p:20,k:0,f:14,cat:'C'},
+  {n:'כתף בקר',c:179,p:22,k:0,f:9,cat:'C'},{n:'כבש',c:209,p:18,k:0,f:15,cat:'C'},
+  // חלבון - דגים
+  {n:'סלמון אטלנטי',c:208,p:20,k:0,f:13,cat:'C'},{n:'סלמון פרש',c:142,p:20,k:0,f:6,cat:'C'},
+  {n:'טונה בציר (שימורים)',c:108,p:24,k:0,f:0.8,cat:'C'},{n:'טונה בשמן (שימורים)',c:198,p:29,k:0,f:9,cat:'C'},
+  {n:'אמנון / טילפיה',c:128,p:26,k:0,f:2.7,cat:'C'},{n:'דג בקלה',c:105,p:23,k:0,f:0.9,cat:'C'},
+  {n:'בס ים',c:97,p:18,k:0,f:2,cat:'C'},{n:'פורל',c:141,p:20,k:0,f:6,cat:'C'},
+  {n:'שרימפס',c:99,p:24,k:0,f:0.3,cat:'C'},{n:'סרדינים בציר',c:108,p:18,k:0,f:4,cat:'C'},
+  // ביצים וחלבי
+  {n:'ביצה שלמה (60ג\')',c:155,p:13,k:1,f:11,cat:'C'},{n:'חלבון ביצה',c:52,p:11,k:0.7,f:0.2,cat:'C'},
+  {n:'חלמון ביצה',c:322,p:16,k:3.6,f:27,cat:'C'},{n:'קוטג\' 1%',c:72,p:11,k:3,f:1,cat:'C'},
+  {n:'קוטג\' 3%',c:82,p:10,k:3.5,f:3.5,cat:'C'},{n:'קוטג\' 5%',c:98,p:9,k:3.5,f:5.5,cat:'C'},
   {n:'גבינה לבנה 5%',c:105,p:11,k:3,f:5,cat:'C'},{n:'גבינה לבנה 9%',c:139,p:10,k:2.8,f:9,cat:'C'},
-  {n:'יוגורט יווני 0%',c:59,p:10,k:3.6,f:0.4,cat:'C'},{n:'יוגורט יווני 2%',c:73,p:10,k:3.6,f:2,cat:'C'},
-  {n:'לבן 3%',c:61,p:3.5,k:4.7,f:3,cat:'C'},{n:'חלב 3%',c:61,p:3.2,k:4.8,f:3.2,cat:'C'},
-  {n:'גבינה צהובה 9%',c:106,p:10,k:1,f:7,cat:'C'},{n:'טופו',c:76,p:8,k:2,f:4.5,cat:'C'},
+  {n:'גבינה לבנה 24%',c:283,p:7,k:2,f:27,cat:'C'},{n:'לבנה 5%',c:120,p:8,k:4,f:8,cat:'C'},
+  {n:'לבנה 9%',c:154,p:7,k:3,f:12,cat:'C'},{n:'יוגורט יווני 0%',c:59,p:10,k:3.6,f:0.4,cat:'C'},
+  {n:'יוגורט יווני 2%',c:73,p:10,k:3.6,f:2,cat:'C'},{n:'יוגורט יווני 5%',c:97,p:9,k:3.5,f:5,cat:'C'},
+  {n:'יוגורט 1.5%',c:63,p:3.5,k:4.7,f:1.5,cat:'C'},{n:'חלב 1%',c:43,p:3.4,k:5,f:1,cat:'C'},
+  {n:'חלב 3%',c:61,p:3.2,k:4.8,f:3.2,cat:'C'},{n:'גבינה צהובה 9% (דלת שומן)',c:106,p:10,k:1,f:7,cat:'C'},
+  {n:'גבינה צהובה 28%',c:395,p:22,k:2,f:33,cat:'C'},{n:'גבינה בולגרית',c:255,p:16,k:0,f:21,cat:'C'},
+  {n:'מוצרלה',c:299,p:22,k:2.2,f:22,cat:'C'},{n:'ריקוטה',c:174,p:11,k:3,f:13,cat:'C'},
+  {n:'טופו קשה',c:76,p:8,k:2,f:4.5,cat:'C'},{n:'טופו רך',c:55,p:6,k:2,f:3,cat:'C'},
+  {n:'חלב סויה',c:54,p:3.3,k:6.3,f:1.9,cat:'C'},
+  // פחמימות - דגנים
   {n:'אורז לבן מבושל',c:130,p:2.7,k:28,f:0.3,cat:'P'},{n:'אורז מלא מבושל',c:111,p:2.6,k:23,f:0.9,cat:'P'},
-  {n:'קווקר',c:379,p:13,k:67,f:6.5,cat:'P'},{n:'פסטה מבושלת',c:131,p:5,k:25,f:1.1,cat:'P'},
-  {n:'בטטה מבושלת',c:86,p:1.6,k:20,f:0.1,cat:'P'},{n:'תפוח אדמה מבושל',c:87,p:1.9,k:20,f:0.1,cat:'P'},
+  {n:'אורז בסמטי מבושל',c:121,p:2.7,k:26,f:0.3,cat:'P'},{n:'קווקר / שיבולת שועל (יבש)',c:379,p:13,k:67,f:6.5,cat:'P'},
+  {n:'שיבולת שועל מבושלת',c:71,p:2.5,k:12,f:1.4,cat:'P'},{n:'פסטה מבושלת',c:131,p:5,k:25,f:1.1,cat:'P'},
+  {n:'ספגטי מבושל',c:158,p:5.8,k:31,f:0.9,cat:'P'},{n:'פסטה מלאה מבושלת',c:124,p:5.1,k:23.5,f:0.8,cat:'P'},
+  {n:'קינואה מבושלת',c:120,p:4.4,k:21,f:1.9,cat:'P'},{n:'כוסמת מבושלת',c:92,p:3.4,k:20,f:0.6,cat:'P'},
+  {n:'בורגול מבושל',c:83,p:3,k:18,f:0.2,cat:'P'},{n:'קוסקוס מבושל',c:112,p:3.8,k:23,f:0.2,cat:'P'},
+  {n:'גרנולה',c:450,p:9,k:65,f:18,cat:'P'},{n:'קורנפלקס',c:357,p:8,k:84,f:0.4,cat:'P'},
+  // פחמימות - לחם ואפייה
   {n:'לחם מלא',c:247,p:9,k:41,f:3.4,cat:'P'},{n:'לחם לבן',c:265,p:9,k:49,f:3.2,cat:'P'},
-  {n:'פיתה',c:275,p:9,k:55,f:1.2,cat:'P'},{n:'לחמניה',c:270,p:9,k:50,f:3,cat:'P'},
-  {n:'עדשים מבושלות',c:116,p:9,k:20,f:0.4,cat:'P'},{n:'חומוס מבושל',c:164,p:8.9,k:27,f:2.6,cat:'P'},
-  {n:'שעועית שחורה',c:132,p:8.9,k:23,f:0.5,cat:'P'},{n:'שעועית לבנה',c:127,p:9,k:22,f:0.5,cat:'P'},
-  {n:'קינואה מבושלת',c:120,p:4.4,k:21,f:1.9,cat:'P'},{n:'תירס מבושל',c:86,p:3.2,k:19,f:1.2,cat:'P'},
-  {n:'כוסמת',c:92,p:3.4,k:20,f:0.6,cat:'P'},{n:'בורגול',c:83,p:3,k:18,f:0.2,cat:'P'},
-  {n:'קוסקוס',c:112,p:3.8,k:23,f:0.2,cat:'P'},{n:'גרנולה',c:450,p:9,k:65,f:18,cat:'P'},
+  {n:'לחם שיפון',c:259,p:8.5,k:48,f:3.3,cat:'P'},{n:'לחם מחמצת',c:289,p:9,k:55,f:1.7,cat:'P'},
+  {n:'פיתה לבנה',c:275,p:9,k:55,f:1.2,cat:'P'},{n:'פיתה מלאה',c:260,p:9.5,k:51,f:2.8,cat:'P'},
+  {n:'לחמניה',c:270,p:9,k:50,f:3,cat:'P'},{n:'בגט / לחם צרפתי',c:272,p:9,k:54,f:1.5,cat:'P'},
+  {n:'טורטייה',c:310,p:8,k:49,f:7.7,cat:'P'},{n:'קרקר מלא',c:408,p:9,k:68,f:10,cat:'P'},
+  // פחמימות - ירקות עמילניים וקטניות
+  {n:'בטטה מבושלת',c:86,p:1.6,k:20,f:0.1,cat:'P'},{n:'תפוח אדמה מבושל',c:87,p:1.9,k:20,f:0.1,cat:'P'},
+  {n:'תפוח אדמה אפוי',c:93,p:2.5,k:21,f:0.1,cat:'P'},{n:'תירס מבושל',c:86,p:3.2,k:19,f:1.2,cat:'P'},
+  {n:'עדשים מבושלות',c:116,p:9,k:20,f:0.4,cat:'P'},{n:'עדשים כתומות מבושלות',c:116,p:9,k:20,f:0.4,cat:'P'},
+  {n:'חומוס מבושל (גרגירים)',c:164,p:8.9,k:27,f:2.6,cat:'P'},{n:'שעועית שחורה מבושלת',c:132,p:8.9,k:23,f:0.5,cat:'P'},
+  {n:'שעועית לבנה מבושלת',c:127,p:9,k:22,f:0.5,cat:'P'},{n:'שעועית אדומה מבושלת',c:127,p:8.7,k:22.8,f:0.5,cat:'P'},
+  {n:'פול מבושל',c:110,p:7.6,k:20,f:0.4,cat:'P'},
+  // ירקות
   {n:'ברוקולי',c:34,p:2.8,k:7,f:0.4,cat:'V'},{n:'כרובית',c:25,p:2,k:5,f:0.3,cat:'V'},
-  {n:'תרד',c:23,p:2.9,k:3.6,f:0.4,cat:'V'},{n:'כרוב',c:25,p:1.3,k:6,f:0.1,cat:'V'},
+  {n:'תרד',c:23,p:2.9,k:3.6,f:0.4,cat:'V'},{n:'קייל',c:35,p:2.9,k:4.4,f:1.5,cat:'V'},
+  {n:'כרוב לבן',c:25,p:1.3,k:6,f:0.1,cat:'V'},{n:'כרוב סגול',c:31,p:1.4,k:7.4,f:0.2,cat:'V'},
   {n:'פלפל אדום',c:31,p:1,k:6,f:0.3,cat:'V'},{n:'פלפל ירוק',c:20,p:0.9,k:4.6,f:0.2,cat:'V'},
-  {n:'עגבנייה',c:18,p:0.9,k:3.9,f:0.2,cat:'V'},{n:'מלפפון',c:16,p:0.7,k:3.6,f:0.1,cat:'V'},
+  {n:'פלפל צהוב',c:27,p:1,k:6.3,f:0.2,cat:'V'},{n:'עגבנייה',c:18,p:0.9,k:3.9,f:0.2,cat:'V'},
+  {n:'עגבנייה שרי',c:18,p:0.9,k:3.9,f:0.2,cat:'V'},{n:'מלפפון',c:16,p:0.7,k:3.6,f:0.1,cat:'V'},
   {n:'גזר',c:41,p:0.9,k:10,f:0.2,cat:'V'},{n:'בצל',c:40,p:1.1,k:9,f:0.1,cat:'V'},
-  {n:'שום',c:149,p:6.4,k:33,f:0.5,cat:'V'},{n:'חסה',c:15,p:1.4,k:2.9,f:0.2,cat:'V'},
-  {n:'מנגולד',c:19,p:1.8,k:3.7,f:0.2,cat:'V'},{n:'אספרגוס',c:20,p:2.2,k:3.7,f:0.1,cat:'V'},
-  {n:'קישואים',c:17,p:1.2,k:3.1,f:0.3,cat:'V'},{n:'חצילים',c:25,p:1,k:5.9,f:0.2,cat:'V'},
-  {n:'פטריות',c:22,p:3.1,k:3.3,f:0.3,cat:'V'},{n:'אפונה',c:81,p:5.4,k:14,f:0.4,cat:'V'},
+  {n:'שום',c:149,p:6.4,k:33,f:0.5,cat:'V'},{n:'חסה ירוקה',c:15,p:1.4,k:2.9,f:0.2,cat:'V'},
+  {n:'רוקט / ארוגולה',c:25,p:2.6,k:2.1,f:0.7,cat:'V'},{n:'תרד ירוק (בייבי)',c:23,p:2.9,k:3.6,f:0.4,cat:'V'},
+  {n:'פטריות לבנות',c:22,p:3.1,k:3.3,f:0.3,cat:'V'},{n:'פטריות פורטובלו',c:22,p:2.1,k:3.9,f:0.4,cat:'V'},
+  {n:'אספרגוס',c:20,p:2.2,k:3.7,f:0.1,cat:'V'},{n:'קישואים',c:17,p:1.2,k:3.1,f:0.3,cat:'V'},
+  {n:'חצילים',c:25,p:1,k:5.9,f:0.2,cat:'V'},{n:'סלרי',c:16,p:0.7,k:3,f:0.2,cat:'V'},
+  {n:'כרישה',c:61,p:1.5,k:14,f:0.3,cat:'V'},{n:'אפונה ירוקה',c:81,p:5.4,k:14,f:0.4,cat:'V'},
+  {n:'שעועית ירוקה',c:31,p:1.8,k:7,f:0.1,cat:'V'},{n:'סלק / ביטה',c:43,p:1.6,k:10,f:0.2,cat:'V'},
+  {n:'ארטישוק',c:47,p:3.3,k:10.5,f:0.2,cat:'V'},{n:'מנגולד',c:19,p:1.8,k:3.7,f:0.2,cat:'V'},
+  {n:'כוסברה',c:23,p:2.1,k:3.7,f:0.5,cat:'V'},{n:'פטרוזיליה',c:36,p:3,k:6.3,f:0.8,cat:'V'},
+  {n:'צנון',c:16,p:0.7,k:3.4,f:0.1,cat:'V'},{n:'עולש / חסה רוקט',c:23,p:1.7,k:4.7,f:0.3,cat:'V'},
+  // פירות
   {n:'בננה',c:89,p:1.1,k:23,f:0.3,cat:'F'},{n:'תפוח',c:52,p:0.3,k:14,f:0.2,cat:'F'},
-  {n:'תפוז',c:47,p:0.9,k:12,f:0.1,cat:'F'},{n:'ענבים',c:69,p:0.7,k:18,f:0.2,cat:'F'},
-  {n:'אבטיח',c:30,p:0.6,k:7.5,f:0.2,cat:'F'},{n:'תות שדה',c:32,p:0.7,k:7.7,f:0.3,cat:'F'},
-  {n:'אוכמניות',c:57,p:0.7,k:14,f:0.3,cat:'F'},{n:'מנגו',c:60,p:0.8,k:15,f:0.4,cat:'F'},
-  {n:'קיווי',c:61,p:1.1,k:15,f:0.5,cat:'F'},{n:'אנגוריה',c:67,p:0.6,k:17,f:0.2,cat:'F'},
-  {n:'תמר',c:277,p:1.8,k:75,f:0.2,cat:'F'},{n:'משמש',c:48,p:1.4,k:11,f:0.4,cat:'F'},
+  {n:'תפוז',c:47,p:0.9,k:12,f:0.1,cat:'F'},{n:'ענבים אדומים',c:69,p:0.7,k:18,f:0.2,cat:'F'},
+  {n:'ענבים ירוקים',c:67,p:0.6,k:17.2,f:0.4,cat:'F'},{n:'אבטיח',c:30,p:0.6,k:7.5,f:0.2,cat:'F'},
+  {n:'מלון',c:34,p:0.8,k:8.2,f:0.2,cat:'F'},{n:'תות שדה',c:32,p:0.7,k:7.7,f:0.3,cat:'F'},
+  {n:'אוכמניות',c:57,p:0.7,k:14,f:0.3,cat:'F'},{n:'פטל',c:52,p:1.2,k:11.9,f:0.7,cat:'F'},
+  {n:'מנגו',c:60,p:0.8,k:15,f:0.4,cat:'F'},{n:'קיווי',c:61,p:1.1,k:15,f:0.5,cat:'F'},
+  {n:'אננס',c:50,p:0.5,k:13,f:0.1,cat:'F'},{n:'אגס',c:57,p:0.4,k:15,f:0.1,cat:'F'},
+  {n:'אפרסק',c:39,p:0.9,k:10,f:0.3,cat:'F'},{n:'נקטרינה',c:44,p:1.1,k:11,f:0.3,cat:'F'},
+  {n:'שזיף',c:46,p:0.7,k:11,f:0.3,cat:'F'},{n:'דובדבן',c:63,p:1.1,k:16,f:0.2,cat:'F'},
+  {n:'תמר מג\'הול',c:277,p:1.8,k:75,f:0.2,cat:'F'},{n:'תמר דגלת',c:282,p:2.5,k:75,f:0.4,cat:'F'},
+  {n:'משמש',c:48,p:1.4,k:11,f:0.4,cat:'F'},{n:'אפרסמון',c:70,p:0.6,k:19,f:0.2,cat:'F'},
+  {n:'רימון',c:83,p:1.7,k:19,f:1.2,cat:'F'},{n:'פומלית',c:38,p:0.8,k:9.6,f:0.1,cat:'F'},
+  {n:'אשכולית',c:42,p:0.8,k:11,f:0.1,cat:'F'},{n:'פפאיה',c:43,p:0.5,k:11,f:0.3,cat:'F'},
+  // שומנים
   {n:'אבוקדו',c:160,p:2,k:9,f:15,cat:'S'},{n:'שמן זית',c:884,p:0,k:0,f:100,cat:'S'},
+  {n:'שמן קנולה',c:884,p:0,k:0,f:100,cat:'S'},{n:'שמן קוקוס',c:862,p:0,k:0,f:100,cat:'S'},
+  {n:'חמאה',c:717,p:0.9,k:0.1,f:81,cat:'S'},{n:'שמן שומשום',c:884,p:0,k:0,f:100,cat:'S'},
   {n:'שקדים',c:579,p:21,k:22,f:50,cat:'S'},{n:'אגוזי מלך',c:654,p:15,k:14,f:65,cat:'S'},
-  {n:'בוטנים',c:567,p:26,k:16,f:49,cat:'S'},{n:'גרעיני חמנייה',c:584,p:21,k:20,f:51,cat:'S'},
-  {n:'טחינה',c:306,p:9,k:11,f:27,cat:'S'},{n:'חמאת בוטנים',c:588,p:25,k:20,f:50,cat:'S'},
-  {n:'שמן קוקוס',c:862,p:0,k:0,f:100,cat:'S'},{n:'חמאה',c:717,p:0.9,k:0.1,f:81,cat:'S'},
-  {n:'גבינת פטה',c:264,p:14,k:4,f:21,cat:'S'},{n:'גבינת צדר',c:403,p:25,k:1.3,f:33,cat:'S'},
+  {n:'בוטנים',c:567,p:26,k:16,f:49,cat:'S'},{n:'קשיוז',c:553,p:18,k:30,f:44,cat:'S'},
+  {n:'פיסטוקים',c:562,p:20,k:28,f:45,cat:'S'},{n:'אגוזי ברזיל',c:659,p:14,k:12,f:67,cat:'S'},
+  {n:'אגוזי לוז',c:628,p:15,k:17,f:61,cat:'S'},{n:'גרעיני חמנייה',c:584,p:21,k:20,f:51,cat:'S'},
+  {n:'גרעיני דלעת',c:559,p:30,k:10.7,f:49,cat:'S'},{n:'גרעיני שומשום',c:573,p:17,k:23,f:50,cat:'S'},
+  {n:'טחינה גולמית',c:595,p:17,k:21,f:54,cat:'S'},{n:'טחינה מדוללת',c:306,p:9,k:11,f:27,cat:'S'},
+  {n:'חמאת שקדים',c:614,p:21,k:19,f:55,cat:'S'},{n:'חמאת בוטנים',c:588,p:25,k:20,f:50,cat:'S'},
+  {n:'שוקולד מריר 70%',c:598,p:7.8,k:45,f:43,cat:'S'},{n:'שוקולד מריר 85%',c:600,p:8,k:13,f:50,cat:'S'},
+  {n:'גבינת שמנת',c:342,p:6,k:4,f:33,cat:'S'},{n:'גבינת פטה',c:264,p:14,k:4,f:21,cat:'S'},
+  {n:'גבינת צ\'דר',c:403,p:25,k:1.3,f:33,cat:'S'},{n:'זיתים ירוקים',c:145,p:1,k:3.8,f:15,cat:'S'},
+  {n:'זיתים שחורים',c:115,p:0.8,k:6.3,f:11,cat:'S'},{n:'קרם קוקוס',c:330,p:3.3,k:6,f:35,cat:'S'},
+  // תוספים
   {n:'פרוטאין וואי',c:380,p:80,k:6,f:5,cat:'X'},{n:'פרוטאין קזאין',c:370,p:80,k:4,f:4,cat:'X'},
-  {n:'פרוטאין צמחי',c:360,p:75,k:8,f:5,cat:'X'},{n:'BCAA',c:20,p:5,k:0,f:0,cat:'X'},
-  {n:'קריאטין',c:0,p:0,k:0,f:0,cat:'X'},{n:'ספירולינה',c:290,p:57,k:24,f:8,cat:'X'},
-  {n:'קרם פנינה',c:560,p:12,k:62,f:28,cat:'X'},{n:'שוקולד 85%',c:600,p:8,k:13,f:50,cat:'X'},
-  {n:'חטיף חלבון',c:200,p:20,k:15,f:7,cat:'X'},{n:'גיינר',c:400,p:25,k:65,f:5,cat:'X'}
+  {n:'פרוטאין צמחי (אפונה)',c:360,p:75,k:8,f:5,cat:'X'},{n:'פרוטאין ביצה',c:385,p:80,k:4,f:2,cat:'X'},
+  {n:'קריאטין מונוהידרט',c:0,p:0,k:0,f:0,cat:'X'},{n:'BCAA',c:20,p:5,k:0,f:0,cat:'X'},
+  {n:'EAA',c:20,p:5,k:0,f:0,cat:'X'},{n:'גלוטמין',c:0,p:0,k:0,f:0,cat:'X'},
+  {n:'ספירולינה',c:290,p:57,k:24,f:8,cat:'X'},{n:'קולגן',c:380,p:90,k:0,f:0,cat:'X'},
+  {n:'חטיף חלבון',c:200,p:20,k:15,f:7,cat:'X'},{n:'גיינר',c:400,p:25,k:65,f:5,cat:'X'},
+  {n:'קרם פנינה',c:560,p:12,k:62,f:28,cat:'X'},{n:'שוקולד חלבון אבקה',c:380,p:75,k:8,f:5,cat:'X'},
+  // מוכן / מסעדה
+  {n:'חומוס (ממרח)',c:166,p:8,k:14,f:9,cat:'R'},{n:'חומוס עם שמן זית',c:207,p:8,k:14,f:13,cat:'R'},
+  {n:'פלאפל מטוגן (100ג\')',c:333,p:11,k:29,f:20,cat:'R'},{n:'פלאפל אפוי (100ג\')',c:230,p:9,k:29,f:9,cat:'R'},
+  {n:'שווארמה עוף',c:170,p:16,k:5,f:9,cat:'R'},{n:'שווארמה בקר',c:195,p:17,k:4,f:12,cat:'R'},
+  {n:'קבב בקר',c:230,p:18,k:2,f:16,cat:'R'},{n:'שניצל עוף',c:230,p:17,k:15,f:10,cat:'R'},
+  {n:'שניצל הודו',c:220,p:20,k:13,f:8,cat:'R'},{n:'עוף בגריל',c:195,p:30,k:0,f:7.5,cat:'R'},
+  {n:'המבורגר פטי (בקר)',c:254,p:17,k:0,f:20,cat:'R'},{n:'שקשוקה',c:120,p:7,k:6,f:8,cat:'R'},
+  {n:'ביצה עלומה / מטוגנת',c:185,p:13,k:0.4,f:14,cat:'R'},{n:'סלט ישראלי',c:30,p:1,k:5,f:1,cat:'R'},
+  {n:'סלט יווני',c:80,p:2.5,k:5,f:6,cat:'R'},{n:'טחינה מוכנה',c:190,p:6,k:11,f:14,cat:'R'},
+  {n:'מסבחה',c:155,p:8,k:14,f:8,cat:'R'},{n:'מג\'דרה',c:132,p:6,k:24,f:2,cat:'R'},
+  {n:'ג\'חנון (100ג\')',c:275,p:6,k:38,f:12,cat:'R'},{n:'בורקס גבינה',c:320,p:9,k:35,f:16,cat:'R'},
+  {n:'בורקס תפו"א',c:285,p:6,k:40,f:12,cat:'R'},{n:'לאפה / לחמנייה ערבית',c:260,p:8,k:50,f:3,cat:'R'},
+  {n:'צ\'יפס מטוגן',c:312,p:3.4,k:41,f:15,cat:'R'},{n:'פיצה פרוסה',c:266,p:11,k:33,f:10,cat:'R'},
+  {n:'מרק עוף (ביתי)',c:35,p:2,k:4,f:1,cat:'R'},{n:'מרק ירקות',c:25,p:1.5,k:5,f:0.4,cat:'R'},
+  {n:'ספגטי בולונז',c:150,p:9,k:18,f:4,cat:'R'},{n:'אורז עם עדשים',c:140,p:5,k:27,f:1.5,cat:'R'},
+  {n:'קבב בפיתה (ארוחה)',c:450,p:25,k:45,f:18,cat:'R'},{n:'שווארמה בלאפה (ארוחה)',c:380,p:22,k:40,f:14,cat:'R'},
+  {n:'פיתה עם חומוס',c:320,p:10,k:52,f:9,cat:'R'},{n:'ביצים מקושקשות (2 ביצים)',c:200,p:14,k:1,f:15,cat:'R'}
 ];
-var FCATS=[{k:'הכל',v:'הכל'},{k:'C',v:'חלבון'},{k:'P',v:'פחמימה'},{k:'V',v:'ירק'},{k:'F',v:'פרי'},{k:'S',v:'שומן'},{k:'X',v:'תוספים'}];
+var FCATS=[{k:'הכל',v:'הכל'},{k:'C',v:'חלבון'},{k:'P',v:'פחמימה'},{k:'V',v:'ירק'},{k:'F',v:'פרי'},{k:'S',v:'שומן'},{k:'R',v:'מוכן'},{k:'X',v:'תוספים'}];
+function _getFoodColor(cat){return _FCAT_COLOR[cat]||'var(--g2)';}
+function getRecentFoods(){try{return JSON.parse(_origGet('_mc3_recent_foods')||'[]');}catch(e){return[];}}
+function addToRecent(food){
+  var rec=getRecentFoods();
+  rec=rec.filter(function(f){return f.n!==food.n;});
+  rec.unshift({n:food.n,c:food.c,p:food.p,k:food.k,f:food.f,cat:food.cat||'C'});
+  if(rec.length>15)rec=rec.slice(0,15);
+  _origSet('_mc3_recent_foods',JSON.stringify(rec));
+}
+function _foodHTML(f,onclick){
+  var col=_getFoodColor(f.cat);
+  return '<div class="food-li" onclick="'+onclick+'" data-n="'+f.n.replace(/"/g,'&quot;')+'" data-src="'+(f._src||'local')+'">'+
+    '<div class="food-cat-dot" style="background:'+col+'"></div>'+
+    '<div class="food-info">'+
+      '<div class="food-n">'+f.n+'</div>'+
+      '<div class="food-m">'+
+        '<span class="food-mac-pill" style="color:#2AACA0;">C '+f.p+'ג</span>'+
+        '<span class="food-mac-pill" style="color:#378ADD;">פ '+f.k+'ג</span>'+
+        '<span class="food-mac-pill" style="color:#FF9F43;">ש '+f.f+'ג</span>'+
+      '</div>'+
+    '</div>'+
+    '<div class="food-kcal"><div class="food-kcal-v">'+f.c+'</div><div class="food-kcal-u">קל\'</div></div>'+
+  '</div>';
+}
 
 function LD(d){return ld('di_'+d)||[];}
 function SD(d,v){sv('di_'+d,v);}
@@ -1708,73 +1821,93 @@ function filterF(){
   _fSearchQ=q;
   var el=document.getElementById('fList');if(!el)return;
   if(!q){
-    if(_fSearchActive)return; // don't clear while search in progress
+    if(_fSearchActive)return;
+    var html='';
+    var rec=getRecentFoods();
+    if(rec.length&&FCAT==='הכל'){
+      html+='<div class="food-sec-hdr">אחרונים</div>';
+      html+=rec.slice(0,6).map(function(f){return _foodHTML(f,'pickFObj(this.dataset.n)');}).join('');
+    }
     var list=FDB;
     if(FCAT!=='הכל')list=list.filter(function(f){return f.cat===FCAT;});
-    el.innerHTML=list.slice(0,15).map(function(f){
-      return '<div class="food-li'+(SFD&&SFD.n===f.n?' on':'')+'" data-n="'+f.n.replace(/"/g,'&quot;')+'" onclick="pickF(this.dataset.n)">'+
-        '<div class="food-n">'+f.n+'</div>'+
-        '<div class="food-m">'+f.c+'קל · C'+f.p+'ג · פ'+f.k+'ג</div></div>';
-    }).join('');
+    if(list.length){
+      html+='<div class="food-sec-hdr">'+(FCAT==='הכל'?'נפוצים':FCATS.find(function(c){return c.k===FCAT;})||{v:''}&&FCATS.find(function(c){return c.k===FCAT;}).v)+'</div>';
+      html+=list.slice(0,FCAT==='הכל'?12:20).map(function(f){return _foodHTML(f,'pickFObj(this.dataset.n)');}).join('');
+    }
+    el.innerHTML=html||'<div class="empty" style="padding:1rem;">אין מאכלים</div>';
     return;
   }
   if(_fSearchTimer)clearTimeout(_fSearchTimer);
   _fSearchTimer=setTimeout(function(){
-    if(_fSearchCache[q]){return renderFList(_fSearchCache[q],q);}
+    // local search first (instant)
+    var local=FDB.filter(function(f){
+      return f.n.indexOf(q)>=0||f.n.toLowerCase().indexOf(q.toLowerCase())>=0;
+    });
+    if(local.length) renderFList(local,q,false);
+    if(_fSearchCache[q]){return renderFList(_fSearchCache[q],q,true);}
     _fSearchActive=true;
-    var el2=document.getElementById('fList');if(el2)el2.innerHTML='<div class="empty" style="padding:1rem;">מחפש...</div>';
     fetch('/api/food-search?q='+encodeURIComponent(q))
       .then(function(r){return r.json();})
       .then(function(d){
         _fSearchActive=false;
-        _fSearchCache[q]=d.foods||[];
-        // only render if user hasn't changed the query
-        if(_fSearchQ===q) renderFList(_fSearchCache[q],q);
+        var apiRes=(d.foods||[]).map(function(f){return Object.assign({},f,{_src:'api'});});
+        // merge: local results first, then API results not already in local
+        var localNames=local.map(function(f){return f.n;});
+        var merged=local.concat(apiRes.filter(function(f){return localNames.indexOf(f.n)<0;}));
+        _fSearchCache[q]=merged;
+        if(_fSearchQ===q) renderFList(merged,q,true);
       }).catch(function(){
         _fSearchActive=false;
-        if(_fSearchQ===q){
-          var local=FDB.filter(function(f){return f.n.toLowerCase().indexOf(q.toLowerCase())>=0;});
-          renderFList(local,q);
-        }
+        if(_fSearchQ===q) renderFList(local,q,true);
       });
-  },400);
+  },250);
 }
-function renderFList(list,q){
+function renderFList(list,q,final){
   var el=document.getElementById('fList');if(!el)return;
-  if(!list.length){el.innerHTML='<div class="empty" style="padding:1rem;">לא נמצא</div>';return;}
-  el.innerHTML=list.slice(0,20).map(function(f){
-    return '<div class="food-li'+(SFD&&SFD.n===f.n?' on':'')+'" data-n="'+f.n.replace(/"/g,'&quot;')+'" onclick="pickFObj(this.dataset.n)">'+
-      '<div class="food-n">'+f.n+'</div>'+
-      '<div class="food-m">'+f.c+'קל · C'+f.p+'ג · פ'+f.k+'ג · ש'+f.f+'ג</div></div>';
-  }).join('');
+  if(!list.length){
+    if(final) el.innerHTML='<div class="empty" style="padding:1rem;color:var(--g2);font-size:13px;">לא נמצא — נסה ברקוד או הזנה ידנית</div>';
+    return;
+  }
   window._fLastList=list;
+  var html='';
+  if(!final) html+='<div class="food-sec-hdr" style="color:var(--teal);">תוצאות מקומיות</div>';
+  html+=list.slice(0,25).map(function(f){return _foodHTML(f,'pickFObj(this.dataset.n)');}).join('');
+  if(!final) html+='<div style="padding:8px 14px;font-size:11px;color:var(--g2);">מחפש עוד...</div>';
+  el.innerHTML=html;
 }
-function pickFObj(name){
-  var list=window._fLastList||FDB;
-  var found=list.find(function(f){return f.n===name;});
-  if(!found)found=FDB.find(function(f){return f.n===name;});
-  if(!found)return;
-  SFD=found;
+function _pickFoodObj(food){
+  SFD=food;
   var el=document.getElementById('fQtyBox');if(el)el.style.display='block';
   var en=document.getElementById('fQtyName');if(en)en.textContent=SFD.n;
   var eq=document.getElementById('fQty');if(eq)eq.value=100;
+  document.querySelectorAll('.food-qty-btn').forEach(function(b){b.classList.toggle('on',b.dataset.g==='100');});
   updFQ();
 }
+function pickFObj(name){
+  var list=window._fLastList||[];
+  var found=list.find(function(f){return f.n===name;})||FDB.find(function(f){return f.n===name;})||getRecentFoods().find(function(f){return f.n===name;});
+  if(!found)return;
+  _pickFoodObj(found);
+}
 function pickF(name){
-  SFD=FDB.find(function(f){return f.n===name;});if(!SFD)return;
-  var el=document.getElementById('fQtyBox');if(el)el.style.display='block';
-  var en=document.getElementById('fQtyName');if(en)en.textContent=SFD.n;
-  var eq=document.getElementById('fQty');if(eq)eq.value=100;
-  updFQ();filterF();
+  var found=FDB.find(function(f){return f.n===name;})||getRecentFoods().find(function(f){return f.n===name;});
+  if(!found)return;
+  _pickFoodObj(found);
+}
+function setFQty(g){
+  var eq=document.getElementById('fQty');if(eq)eq.value=g;
+  document.querySelectorAll('.food-qty-btn').forEach(function(b){b.classList.toggle('on',b.dataset.g===String(g));});
+  updFQ();
 }
 function updFQ(){
   if(!SFD)return;
   var q=parseFloat(document.getElementById('fQty').value)||100;
   var el=document.getElementById('fQtyMac');if(!el)return;
-  el.innerHTML='<span style="color:var(--ok);font-weight:700;">'+Math.round(SFD.c*q/100)+' קל</span>'+
-    '<span style="color:var(--teal);">C '+(SFD.p*q/100).toFixed(1)+'ג</span>'+
-    '<span style="color:#378ADD;">פ '+(SFD.k*q/100).toFixed(1)+'ג</span>'+
-    '<span style="color:var(--warn);">ש '+(SFD.f*q/100).toFixed(1)+'ג</span>';
+  el.innerHTML=
+    '<span style="font-size:20px;font-weight:800;color:var(--ok);">'+Math.round(SFD.c*q/100)+'</span><span style="color:var(--g2);font-size:12px;"> קל\'</span>  '+
+    '<span style="color:#2AACA0;font-size:13px;">C '+(SFD.p*q/100).toFixed(1)+'ג</span>  '+
+    '<span style="color:#378ADD;font-size:13px;">פ '+(SFD.k*q/100).toFixed(1)+'ג</span>  '+
+    '<span style="color:var(--warn);font-size:13px;">ש '+(SFD.f*q/100).toFixed(1)+'ג</span>';
 }
 function addFE(){
   if(!SFD)return;
@@ -1782,6 +1915,7 @@ function addFE(){
   var e=LD(ND);
   var ms=document.getElementById('mealSl');
   e.push({n:SFD.n,q:q,c:Math.round(SFD.c*q/100),p:Math.round(SFD.p*q/100*10)/10,k:Math.round(SFD.k*q/100*10)/10,f:Math.round(SFD.f*q/100*10)/10,m:ms?ms.value:'ארוחת בוקר'});
+  addToRecent(SFD);
   SD(ND,e);SFD=null;
   var el=document.getElementById('fQtyBox');if(el)el.style.display='none';
   var fs=document.getElementById('fSearch');if(fs)fs.value='';
