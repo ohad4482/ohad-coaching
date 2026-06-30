@@ -3431,6 +3431,11 @@ localStorage.removeItem=function(k){
 
 async function syncFromCloud(){
   try{
+    // push local changes FIRST so cloud is up-to-date before we read
+    const dirty=getDirtyData();
+    if(Object.keys(dirty).length){
+      await fetch('/api/sync/bulk',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(dirty)});
+    }
     const res=await fetch('/api/sync');
     if(!res.ok) return;
     const data=await res.json();
@@ -3440,7 +3445,7 @@ async function syncFromCloud(){
       if(localTs>lastSync) return; // locally modified since last sync — keep local
       if(v) _origSet(k,v); else _origRem(k);
     });
-    _origSet('_mc3_lastSync', String(Date.now())); // mark successful sync time
+    _origSet('_mc3_lastSync', String(Date.now()));
   }catch(e){}
 }
 
