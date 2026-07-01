@@ -3684,16 +3684,22 @@ async function pushToCloud(){
   if(_pushTimer){clearTimeout(_pushTimer);_pushTimer=null;}
   try{
     const d=getDirtyData();
-    if(!Object.keys(d).length) return;
-    await fetch('/api/sync/bulk',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});
-    // intentionally NOT updating lastSync or localTs here
-  }catch(e){}
+    const keys=Object.keys(d);
+    if(!keys.length){console.log('[SYNC] pushToCloud: nothing dirty');return;}
+    console.log('[SYNC] pushToCloud: pushing',keys);
+    const r=await fetch('/api/sync/bulk',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});
+    console.log('[SYNC] pushToCloud: response',r.status,r.ok);
+  }catch(e){console.error('[SYNC] pushToCloud error',e);}
 }
 
 // override localStorage — every app-key write schedules an immediate push
 localStorage.setItem=function(k,v){
   _origSet(k,v);
-  if(isAppKey(k)){_origSet('_mc3_localTs_'+k,String(Date.now()));schedulePush();}
+  if(isAppKey(k)){
+    _origSet('_mc3_localTs_'+k,String(Date.now()));
+    console.log('[SYNC] setItem dirty:',k);
+    schedulePush();
+  }
 };
 localStorage.removeItem=function(k){
   _origRem(k);
@@ -3702,28 +3708,32 @@ localStorage.removeItem=function(k){
 
 async function syncFromCloud(){
   try{
-    // push local changes FIRST so cloud is up-to-date before we read
+    const lastSync0=parseInt(_origGet('_mc3_lastSync')||'0');
     const dirty=getDirtyData();
     const dirtyKeys=new Set(Object.keys(dirty));
+    console.log('[SYNC] syncFromCloud: lastSync=',lastSync0,'dirty=',Array.from(dirtyKeys));
     if(dirtyKeys.size>0){
       const pushRes=await fetch('/api/sync/bulk',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(dirty)});
-      if(!pushRes.ok) return; // push failed — abort entirely, don't advance lastSync
+      console.log('[SYNC] syncFromCloud: push response',pushRes.status,pushRes.ok);
+      if(!pushRes.ok){console.error('[SYNC] push failed, aborting');return;}
     }
     const res=await fetch('/api/sync');
-    if(!res.ok) return;
+    if(!res.ok){console.error('[SYNC] GET failed',res.status);return;}
     const data=await res.json();
     const lastSync=parseInt(_origGet('_mc3_lastSync')||'0');
+    let applied=0,skipped=0;
     Object.entries(data).forEach(([k,v])=>{
-      if(dirtyKeys.has(k)) return; // we just pushed this key — always trust local copy
+      if(dirtyKeys.has(k)){skipped++;return;}
       const localTs=parseInt(_origGet('_mc3_localTs_'+k)||'0');
-      if(localTs>lastSync) return; // locally modified since last sync — keep local
+      if(localTs>lastSync){skipped++;return;}
       if(v) _origSet(k,v); else _origRem(k);
+      applied++;
     });
+    console.log('[SYNC] syncFromCloud: applied',applied,'skipped',skipped);
     const newTs=String(Date.now());
-    _origSet('_mc3_lastSync', newTs);
-    // stamp pushed keys so they stay protected until a fresh modification
-    dirtyKeys.forEach(function(k){_origSet('_mc3_localTs_'+k, newTs);});
-  }catch(e){}
+    _origSet('_mc3_lastSync',newTs);
+    dirtyKeys.forEach(function(k){_origSet('_mc3_localTs_'+k,newTs);});
+  }catch(e){console.error('[SYNC] syncFromCloud error',e);}
 }
 
 // ===== HOME SCREEN =====
