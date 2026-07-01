@@ -3708,31 +3708,47 @@ localStorage.removeItem=function(k){
 
 async function syncFromCloud(){
   try{
-    const lastSync0=parseInt(_origGet('_mc3_lastSync')||'0');
+    // 1. push all locally-modified data first
     const dirty=getDirtyData();
     const dirtyKeys=new Set(Object.keys(dirty));
-    console.log('[SYNC] syncFromCloud: lastSync=',lastSync0,'dirty=',Array.from(dirtyKeys));
+    console.log('[SYNC] syncFromCloud: dirty=',Array.from(dirtyKeys));
     if(dirtyKeys.size>0){
       const pushRes=await fetch('/api/sync/bulk',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(dirty)});
-      console.log('[SYNC] syncFromCloud: push response',pushRes.status,pushRes.ok);
+      console.log('[SYNC] push response',pushRes.status,pushRes.ok);
       if(!pushRes.ok){console.error('[SYNC] push failed, aborting');return;}
     }
+    // 2. read cloud — each entry now has {v, t} where t = server updated_at in ms
     const res=await fetch('/api/sync');
     if(!res.ok){console.error('[SYNC] GET failed',res.status);return;}
     const data=await res.json();
-    const lastSync=parseInt(_origGet('_mc3_lastSync')||'0');
     let applied=0,skipped=0;
-    Object.entries(data).forEach(([k,v])=>{
+    Object.entries(data).forEach(([k,item])=>{
+      // if we just pushed this key — trust local, don't overwrite
       if(dirtyKeys.has(k)){skipped++;return;}
+      const cloudT=item.t||0;  // server timestamp (ms)
       const localTs=parseInt(_origGet('_mc3_localTs_'+k)||'0');
-      if(localTs>lastSync){skipped++;return;}
-      if(v) _origSet(k,v); else _origRem(k);
-      applied++;
+      // apply cloud only if server version is NEWER than our last local modification
+      if(cloudT>localTs){
+        if(item.v) _origSet(k,item.v); else _origRem(k);
+        _origSet('_mc3_localTs_'+k,String(cloudT)); // align local ts to server ts
+        applied++;
+      } else {
+        skipped++;
+      }
     });
     console.log('[SYNC] syncFromCloud: applied',applied,'skipped',skipped);
-    const newTs=String(Date.now());
-    _origSet('_mc3_lastSync',newTs);
-    dirtyKeys.forEach(function(k){_origSet('_mc3_localTs_'+k,newTs);});
+    // 3. mark pushed keys: align their localTs to now so next cloud read won't overwrite
+    if(dirtyKeys.size>0){
+      // re-read to get server timestamps of what we just pushed
+      const res2=await fetch('/api/sync');
+      if(res2.ok){
+        const data2=await res2.json();
+        dirtyKeys.forEach(function(k){
+          if(data2[k]&&data2[k].t) _origSet('_mc3_localTs_'+k,String(data2[k].t));
+        });
+      }
+    }
+    _origSet('_mc3_lastSync',String(Date.now()));
   }catch(e){console.error('[SYNC] syncFromCloud error',e);}
 }
 
