@@ -2479,7 +2479,7 @@ var _EX_IMG={'לחיצת חזה כנגד מוט':'Barbell Bench Press - Medium G
 function getExImg(n){var e=_EX_IMG[n];if(!e)return null;return 'https://cdn.jsdelivr.net/gh/yuhonas/free-exercise-db@main/exercises/'+e.replace(/ /g,'_').replace(/\//g,'_')+'/0.jpg';}
 
 function LP(){return ld('plan')||[];}
-function SaveP(p){sv('plan',p);}
+function SaveP(p){sv('plan',p);pushToCloud();}
 function LDPW(){return parseInt(ld('dpw'))||4;}
 var _DEFAULT_DAYS=['יום א','יום ב','יום ג','יום ד','יום ה','יום ו','יום ז'];
 function LDNS(){return ld('dayNames')||_DEFAULT_DAYS;}
@@ -3699,19 +3699,25 @@ async function syncFromCloud(){
   try{
     // push local changes FIRST so cloud is up-to-date before we read
     const dirty=getDirtyData();
-    if(Object.keys(dirty).length){
-      await fetch('/api/sync/bulk',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(dirty)});
+    const dirtyKeys=new Set(Object.keys(dirty));
+    if(dirtyKeys.size>0){
+      const pushRes=await fetch('/api/sync/bulk',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(dirty)});
+      if(!pushRes.ok) return; // push failed — abort entirely, don't advance lastSync
     }
     const res=await fetch('/api/sync');
     if(!res.ok) return;
     const data=await res.json();
     const lastSync=parseInt(_origGet('_mc3_lastSync')||'0');
     Object.entries(data).forEach(([k,v])=>{
+      if(dirtyKeys.has(k)) return; // we just pushed this key — always trust local copy
       const localTs=parseInt(_origGet('_mc3_localTs_'+k)||'0');
       if(localTs>lastSync) return; // locally modified since last sync — keep local
       if(v) _origSet(k,v); else _origRem(k);
     });
-    _origSet('_mc3_lastSync', String(Date.now()));
+    const newTs=String(Date.now());
+    _origSet('_mc3_lastSync', newTs);
+    // stamp pushed keys so they stay protected until a fresh modification
+    dirtyKeys.forEach(function(k){_origSet('_mc3_localTs_'+k, newTs);});
   }catch(e){}
 }
 
@@ -4017,7 +4023,7 @@ function openTip(id){
 
 // ===== NUTRITION PLAN (coach writes, athlete reads) =====
 function loadNutPlan(){return gsk('mc3_'+(ROLE==='coach'?VIEW_ATH:ATH_ID)+'_nut_plan')||{text:'',meals:[]};}
-function saveNutPlanData(d){gsvk('mc3_'+(ROLE==='coach'?VIEW_ATH:ATH_ID)+'_nut_plan',d);}
+function saveNutPlanData(d){gsvk('mc3_'+(ROLE==='coach'?VIEW_ATH:ATH_ID)+'_nut_plan',d);pushToCloud();}
 function buildCoachNutPlanHTML(){
   var p=loadNutPlan();
   return '<div id="coachNutPlanSection" class="card" style="margin-top:12px;">'+
