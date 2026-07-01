@@ -3671,28 +3671,34 @@ function getDirtyData(){
   return d;
 }
 
-async function pushKey(k,v){
-  try{
-    await fetch('/api/sync',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({key:k,value:v})});
-  }catch(e){}
+var _pushTimer=null;
+function schedulePush(){
+  if(_pushTimer)clearTimeout(_pushTimer);
+  _pushTimer=setTimeout(pushToCloud,400);
 }
 
 async function pushToCloud(){
+  if(_pushTimer){clearTimeout(_pushTimer);_pushTimer=null;}
   try{
-    const d=getDirtyData(); // only send locally-modified keys
+    const d=getDirtyData();
     if(!Object.keys(d).length) return;
-    await fetch('/api/sync/bulk',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});
+    const r=await fetch('/api/sync/bulk',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});
+    if(!r.ok) return;
+    // push succeeded — advance lastSync so these keys are clean
+    const newTs=String(Date.now());
+    _origSet('_mc3_lastSync',newTs);
+    Object.keys(d).forEach(function(k){_origSet('_mc3_localTs_'+k,newTs);});
   }catch(e){}
 }
 
-// override localStorage to push immediately on every write
+// override localStorage — every app-key write schedules an immediate push
 localStorage.setItem=function(k,v){
   _origSet(k,v);
-  if(isAppKey(k)){_origSet('_mc3_localTs_'+k, String(Date.now()));pushKey(k,v);}
+  if(isAppKey(k)){_origSet('_mc3_localTs_'+k,String(Date.now()));schedulePush();}
 };
 localStorage.removeItem=function(k){
   _origRem(k);
-  if(isAppKey(k)) pushKey(k,'');
+  if(isAppKey(k)){_origSet('_mc3_localTs_'+k,String(Date.now()));schedulePush();}
 };
 
 async function syncFromCloud(){
