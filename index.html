@@ -3677,17 +3677,16 @@ function schedulePush(){
   _pushTimer=setTimeout(pushToCloud,400);
 }
 
+// pushToCloud: sends dirty data to cloud but does NOT advance lastSync.
+// Only syncFromCloud is allowed to mark data as "clean" — after it has
+// both pushed AND confirmed cloud has the data by reading it back.
 async function pushToCloud(){
   if(_pushTimer){clearTimeout(_pushTimer);_pushTimer=null;}
   try{
     const d=getDirtyData();
     if(!Object.keys(d).length) return;
-    const r=await fetch('/api/sync/bulk',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});
-    if(!r.ok) return;
-    // push succeeded — advance lastSync so these keys are clean
-    const newTs=String(Date.now());
-    _origSet('_mc3_lastSync',newTs);
-    Object.keys(d).forEach(function(k){_origSet('_mc3_localTs_'+k,newTs);});
+    await fetch('/api/sync/bulk',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});
+    // intentionally NOT updating lastSync or localTs here
   }catch(e){}
 }
 
