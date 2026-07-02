@@ -3661,10 +3661,12 @@ const _origSet=localStorage.setItem.bind(localStorage);
 const _origRem=localStorage.removeItem.bind(localStorage);
 const _origGet=localStorage.getItem.bind(localStorage);
 
-// In-memory dirty set: keys edited since page load.
-// Cleared per-key after successful cloud push.
-// Never persisted — on reload we trust cloud as source of truth.
-var _dirty=new Set();
+// Dirty set: keys edited locally but not yet confirmed pushed to cloud.
+// Persisted in localStorage so it survives page refresh.
+var _dirty=(function(){
+  try{var s=_origGet('_mc3_dirty');return s?new Set(JSON.parse(s)):new Set();}catch(e){return new Set();}
+})();
+function _saveDirty(){_origSet('_mc3_dirty',JSON.stringify(Array.from(_dirty)));}
 
 var _pushTimer=null;
 function schedulePush(){
@@ -3677,11 +3679,12 @@ async function pushToCloud(){
   if(!_dirty.size) return;
   var d={};
   _dirty.forEach(function(k){var v=_origGet(k);if(v!==null)d[k]=v;});
-  if(!Object.keys(d).length){_dirty.clear();return;}
+  if(!Object.keys(d).length){_dirty.clear();_saveDirty();return;}
   try{
     var r=await fetch('/api/sync/bulk',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});
     if(r.ok){
       Object.keys(d).forEach(function(k){_dirty.delete(k);});
+      _saveDirty();
     }
   }catch(e){}
 }
@@ -3689,11 +3692,11 @@ async function pushToCloud(){
 // override localStorage — every app-key write marks key dirty and schedules push
 localStorage.setItem=function(k,v){
   _origSet(k,v);
-  if(isAppKey(k)){_dirty.add(k);schedulePush();}
+  if(isAppKey(k)){_dirty.add(k);_saveDirty();schedulePush();}
 };
 localStorage.removeItem=function(k){
   _origRem(k);
-  if(isAppKey(k)){_dirty.add(k);schedulePush();}
+  if(isAppKey(k)){_dirty.add(k);_saveDirty();schedulePush();}
 };
 
 async function pushAllToCloud(){
