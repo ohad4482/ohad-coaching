@@ -3723,22 +3723,26 @@ async function pushAllToCloud(){
 
 async function syncFromCloud(){
   try{
+    console.log('[SYNC] start dirty=',[..._dirty]);
     // push any dirty keys first
-    if(_dirty.size>0) await pushToCloud();
+    if(_dirty.size>0){
+      console.log('[SYNC] pushing dirty before pull');
+      await pushToCloud();
+      console.log('[SYNC] after push, dirty=',[..._dirty]);
+    }
     // pull cloud — apply everything except keys still dirty (edited but not yet pushed)
     const res=await fetch('/api/sync');
-    if(!res.ok) return;
+    if(!res.ok){console.error('[SYNC] GET failed',res.status);return;}
     const data=await res.json();
-    let applied=0;
+    let applied=0,skipped=0;
     Object.entries(data).forEach(function([k,item]){
-      if(_dirty.has(k)) return; // keep local pending edit
-      // support both old string format and new {v,t} object format
+      if(_dirty.has(k)){skipped++;return;}
       const v=(item&&typeof item==='object')?item.v:item;
       if(v) _origSet(k,v); else _origRem(k);
       applied++;
     });
-    console.log('[SYNC] applied',applied,'from cloud, dirty=',_dirty.size);
-  }catch(e){console.error('[SYNC] syncFromCloud error',e);}
+    console.log('[SYNC] done: applied='+applied+' skipped='+skipped+' dirty=',[..._dirty]);
+  }catch(e){console.error('[SYNC] error',e);}
 }
 
 // ===== HOME SCREEN =====
