@@ -3758,13 +3758,14 @@ async function pushAllToCloud(){
 
 async function syncFromCloud(){
   try{
-    await pushToCloud(); // push any pending dirty keys first
+    await pushToCloud();
+    var protectedKeys=Object.assign({},_dirty);
     var res=await fetch('/api/sync');
     if(!res.ok) return;
     var data=await res.json();
     Object.entries(data).forEach(function(entry){
       var k=entry[0], item=entry[1];
-      if(_dirty[k]){_slog('PULL_SKIP '+k.replace('mc3_2_',''));return;}
+      if(_dirty[k]||protectedKeys[k]){_slog('PULL_SKIP '+k.replace('mc3_2_',''));return;}
       var v=(item&&typeof item==='object')?item.v:item;
       if(v){_origSet(k,v);if(k==='mc3_2_wts')_slog('PULL_SET wts='+JSON.parse(v).length+'items');}
       else _origRem(k);
