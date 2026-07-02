@@ -3661,29 +3661,10 @@ const _origSet=localStorage.setItem.bind(localStorage);
 const _origRem=localStorage.removeItem.bind(localStorage);
 const _origGet=localStorage.getItem.bind(localStorage);
 
-// one-time migration: old code stamped localTs=Date.now() on every sync for all keys,
-// making them look "locally modified" even when they weren't. Clear those so cloud wins.
-(function(){
-  if(_origGet('_mc3_sync_v3')) return;
-  var toRem=[];
-  for(var i=0;i<localStorage.length;i++){var k=localStorage.key(i);if(k&&k.startsWith('_mc3_localTs_'))toRem.push(k);}
-  toRem.forEach(function(k){_origRem(k);});
-  _origRem('_mc3_lastSync');
-  _origSet('_mc3_sync_v3','1');
-})();
-
-// only keys modified locally since last sync
-function getDirtyData(){
-  const d={};
-  const lastSync=parseInt(_origGet('_mc3_lastSync')||'0');
-  for(let i=0;i<localStorage.length;i++){
-    const k=localStorage.key(i);
-    if(!isAppKey(k)) continue;
-    const localTs=parseInt(_origGet('_mc3_localTs_'+k)||'0');
-    if(localTs>lastSync) d[k]=_origGet(k);
-  }
-  return d;
-}
+// In-memory dirty set: keys edited since page load.
+// Cleared per-key after successful cloud push.
+// Never persisted — on reload we trust cloud as source of truth.
+var _dirty=new Set();
 
 var _pushTimer=null;
 function schedulePush(){
@@ -3691,33 +3672,28 @@ function schedulePush(){
   _pushTimer=setTimeout(pushToCloud,400);
 }
 
-// pushToCloud: sends dirty data to cloud but does NOT advance lastSync.
-// Only syncFromCloud is allowed to mark data as "clean" — after it has
-// both pushed AND confirmed cloud has the data by reading it back.
 async function pushToCloud(){
   if(_pushTimer){clearTimeout(_pushTimer);_pushTimer=null;}
+  if(!_dirty.size) return;
+  var d={};
+  _dirty.forEach(function(k){var v=_origGet(k);if(v!==null)d[k]=v;});
+  if(!Object.keys(d).length){_dirty.clear();return;}
   try{
-    const d=getDirtyData();
-    const keys=Object.keys(d);
-    if(!keys.length){console.log('[SYNC] pushToCloud: nothing dirty');return;}
-    console.log('[SYNC] pushToCloud: pushing',keys);
-    const r=await fetch('/api/sync/bulk',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});
-    console.log('[SYNC] pushToCloud: response',r.status,r.ok);
-  }catch(e){console.error('[SYNC] pushToCloud error',e);}
+    var r=await fetch('/api/sync/bulk',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});
+    if(r.ok){
+      Object.keys(d).forEach(function(k){_dirty.delete(k);});
+    }
+  }catch(e){}
 }
 
-// override localStorage — every app-key write schedules an immediate push
+// override localStorage — every app-key write marks key dirty and schedules push
 localStorage.setItem=function(k,v){
   _origSet(k,v);
-  if(isAppKey(k)){
-    _origSet('_mc3_localTs_'+k,String(Date.now()));
-    console.log('[SYNC] setItem dirty:',k);
-    schedulePush();
-  }
+  if(isAppKey(k)){_dirty.add(k);schedulePush();}
 };
 localStorage.removeItem=function(k){
   _origRem(k);
-  if(isAppKey(k)){_origSet('_mc3_localTs_'+k,String(Date.now()));schedulePush();}
+  if(isAppKey(k)){_dirty.add(k);schedulePush();}
 };
 
 async function pushAllToCloud(){
@@ -3744,50 +3720,21 @@ async function pushAllToCloud(){
 
 async function syncFromCloud(){
   try{
-    // 1. push all locally-modified data first
-    const dirty=getDirtyData();
-    const dirtyKeys=new Set(Object.keys(dirty));
-    console.log('[SYNC] syncFromCloud: dirty=',Array.from(dirtyKeys));
-    if(dirtyKeys.size>0){
-      const pushRes=await fetch('/api/sync/bulk',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(dirty)});
-      console.log('[SYNC] push response',pushRes.status,pushRes.ok);
-      if(!pushRes.ok){console.error('[SYNC] push failed, aborting');return;}
-    }
-    // 2. read cloud — each entry now has {v, t} where t = server updated_at in ms
+    // push any dirty keys first
+    if(_dirty.size>0) await pushToCloud();
+    // pull cloud — apply everything except keys still dirty (edited but not yet pushed)
     const res=await fetch('/api/sync');
-    if(!res.ok){console.error('[SYNC] GET failed',res.status);return;}
+    if(!res.ok) return;
     const data=await res.json();
-    let applied=0,skipped=0;
-    Object.entries(data).forEach(([k,item])=>{
-      // if we just pushed this key — trust local, don't overwrite
-      if(dirtyKeys.has(k)){skipped++;return;}
-      // support both old format (string) and new format ({v, t})
-      const isObj=item&&typeof item==='object';
-      const cloudT=isObj?(item.t||0):Date.now(); // old format: always apply
-      const v=isObj?item.v:item;
-      const localTs=parseInt(_origGet('_mc3_localTs_'+k)||'0');
-      // apply cloud only if server version is NEWER than our last local modification
-      if(cloudT>localTs){
-        if(v) _origSet(k,v); else _origRem(k);
-        _origSet('_mc3_localTs_'+k,String(cloudT)); // align local ts to server ts
-        applied++;
-      } else {
-        skipped++;
-      }
+    let applied=0;
+    Object.entries(data).forEach(function([k,item]){
+      if(_dirty.has(k)) return; // keep local pending edit
+      // support both old string format and new {v,t} object format
+      const v=(item&&typeof item==='object')?item.v:item;
+      if(v) _origSet(k,v); else _origRem(k);
+      applied++;
     });
-    console.log('[SYNC] syncFromCloud: applied',applied,'skipped',skipped);
-    // 3. mark pushed keys: align their localTs to now so next cloud read won't overwrite
-    if(dirtyKeys.size>0){
-      // re-read to get server timestamps of what we just pushed
-      const res2=await fetch('/api/sync');
-      if(res2.ok){
-        const data2=await res2.json();
-        dirtyKeys.forEach(function(k){
-          if(data2[k]&&data2[k].t) _origSet('_mc3_localTs_'+k,String(data2[k].t));
-        });
-      }
-    }
-    _origSet('_mc3_lastSync',String(Date.now()));
+    console.log('[SYNC] applied',applied,'from cloud, dirty=',_dirty.size);
   }catch(e){console.error('[SYNC] syncFromCloud error',e);}
 }
 
