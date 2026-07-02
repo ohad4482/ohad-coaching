@@ -3664,12 +3664,14 @@ const _origSet=localStorage.setItem.bind(localStorage);
 const _origRem=localStorage.removeItem.bind(localStorage);
 const _origGet=localStorage.getItem.bind(localStorage);
 
-// Per-key edit timestamps (in-memory). Set on every local write.
-// Used to skip applying cloud data for keys edited in the last 60s.
-var _editTs={};
-
-// Track last time each key was pulled from cloud
-var _cloudTs={};
+// Persistent dirty set — survives page reloads.
+// A key stays dirty until its push is confirmed by the server.
+// While dirty, cloud pulls never overwrite the local value.
+var _dirty={};
+function _loadDirty(){try{return JSON.parse(_origGet('_sync_dirty')||'{}');}catch(e){return{};}}
+function _saveDirty(){_origSet('_sync_dirty',JSON.stringify(_dirty));}
+function _markDirty(k){_dirty[k]=true;_saveDirty();}
+function _clearDirty(k){delete _dirty[k];_saveDirty();}
 
 var _pushTimer=null;
 function schedulePush(){
@@ -3678,15 +3680,11 @@ function schedulePush(){
 }
 
 function _buildPushData(){
-  // Push all keys edited more recently than last cloud pull for that key
   var d={};
-  var now=Date.now();
   for(var i=0;i<localStorage.length;i++){
     var k=localStorage.key(i);
     if(!isAppKey(k)) continue;
-    var et=_editTs[k]||0;
-    var ct=_cloudTs[k]||0;
-    if(et>ct){var v=_origGet(k);if(v!==null)d[k]=v;}
+    if(_dirty[k]){var v=_origGet(k);if(v!==null)d[k]=v;}
   }
   return d;
 }
@@ -3698,8 +3696,7 @@ async function pushToCloud(){
   try{
     var r=await fetch('/api/sync/bulk',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});
     if(r.ok){
-      var now=Date.now();
-      Object.keys(d).forEach(function(k){_cloudTs[k]=now;});
+      Object.keys(d).forEach(function(k){_clearDirty(k);});
     }
   }catch(e){}
 }
@@ -3710,14 +3707,14 @@ function _beaconPush(){
   navigator.sendBeacon('/api/sync/bulk',new Blob([JSON.stringify(d)],{type:'application/json'}));
 }
 
-// override localStorage — every app-key write records edit time and schedules push
+// override localStorage — every app-key write marks the key dirty and schedules push
 localStorage.setItem=function(k,v){
   _origSet(k,v);
-  if(isAppKey(k)){_editTs[k]=Date.now();schedulePush();}
+  if(isAppKey(k)){_markDirty(k);schedulePush();}
 };
 localStorage.removeItem=function(k){
   _origRem(k);
-  if(isAppKey(k)){_editTs[k]=Date.now();schedulePush();}
+  if(isAppKey(k)){_markDirty(k);schedulePush();}
 };
 
 async function pushAllToCloud(){
@@ -3732,8 +3729,7 @@ async function pushAllToCloud(){
     if(!Object.keys(all).length){if(btn){btn.textContent='☁️ סנכרן הכל';btn.disabled=false;}return;}
     var r=await fetch('/api/sync/bulk',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(all)});
     if(r.ok){
-      var now=Date.now();
-      Object.keys(all).forEach(function(k){_cloudTs[k]=now;_editTs[k]=now;});
+      Object.keys(all).forEach(function(k){_clearDirty(k);});
       if(btn){btn.textContent='✅ הועלה!';setTimeout(function(){btn.textContent='☁️ סנכרן הכל';btn.disabled=false;},2000);}
     }else{
       if(btn){btn.textContent='❌ שגיאה';setTimeout(function(){btn.textContent='☁️ סנכרן הכל';btn.disabled=false;},2000);}
@@ -3745,20 +3741,15 @@ async function pushAllToCloud(){
 
 async function syncFromCloud(){
   try{
-    // push any locally-edited keys first
-    await pushToCloud();
-    // pull cloud
+    await pushToCloud(); // push any pending dirty keys first
     var res=await fetch('/api/sync');
     if(!res.ok) return;
     var data=await res.json();
-    var now=Date.now();
     Object.entries(data).forEach(function(entry){
       var k=entry[0], item=entry[1];
-      // never overwrite a key that has local edits not yet confirmed by cloud
-      if((_editTs[k]||0) > (_cloudTs[k]||0)) return;
+      if(_dirty[k]) return; // local edit not yet confirmed — never overwrite
       var v=(item&&typeof item==='object')?item.v:item;
       if(v) _origSet(k,v); else _origRem(k);
-      _cloudTs[k]=now;
     });
   }catch(e){console.error('[SYNC]',e);}
 }
@@ -4111,6 +4102,7 @@ function doneSet(exId,restStr,lk,si){
 
 // ===== INIT =====
 document.addEventListener('DOMContentLoaded',async function(){
+  _dirty=_loadDirty(); // restore pending edits from previous session
   selRole('coach');
   await syncFromCloud();
   if(ROLE==='athlete')rendHome();
