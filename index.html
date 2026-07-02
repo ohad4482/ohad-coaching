@@ -315,7 +315,10 @@ input.ph-prev::placeholder{color:rgba(160,165,185,0.7);font-style:italic;}
     </div>
     <!-- CV: athletes list -->
     <div id="cv-athletes" class="ss">
-      <div style="margin-bottom:12px;"><button class="btn btn-p" onclick="openAddAthlete()">+ מתאמן חדש</button></div>
+      <div style="margin-bottom:12px;display:flex;gap:8px;align-items:center;">
+        <button class="btn btn-p" onclick="openAddAthlete()">+ מתאמן חדש</button>
+        <button class="btn btn-s btn-sm" id="syncAllBtn" onclick="pushAllToCloud()" style="margin-right:auto;">☁️ סנכרן הכל</button>
+      </div>
       <div id="athListFull"></div>
     </div>
     <!-- CV: exercise database -->
@@ -3716,6 +3719,28 @@ localStorage.removeItem=function(k){
   _origRem(k);
   if(isAppKey(k)){_origSet('_mc3_localTs_'+k,String(Date.now()));schedulePush();}
 };
+
+async function pushAllToCloud(){
+  var btn=document.getElementById('syncAllBtn');
+  if(btn){btn.textContent='⏳ שולח...';btn.disabled=true;}
+  try{
+    var all={};
+    for(var i=0;i<localStorage.length;i++){
+      var k=localStorage.key(i);
+      if(isAppKey(k)){var v=_origGet(k);if(v)all[k]=v;}
+    }
+    var keys=Object.keys(all);
+    if(!keys.length){if(btn){btn.textContent='☁️ סנכרן הכל';btn.disabled=false;}return;}
+    var r=await fetch('/api/sync/bulk',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(all)});
+    if(r.ok){
+      if(btn){btn.textContent='✅ הועלה!';setTimeout(function(){btn.textContent='☁️ סנכרן הכל';btn.disabled=false;},2000);}
+    } else {
+      if(btn){btn.textContent='❌ שגיאה';setTimeout(function(){btn.textContent='☁️ סנכרן הכל';btn.disabled=false;},2000);}
+    }
+  }catch(e){
+    if(btn){btn.textContent='❌ שגיאה';setTimeout(function(){btn.textContent='☁️ סנכרן הכל';btn.disabled=false;},2000);}
+  }
+}
 
 async function syncFromCloud(){
   try{
