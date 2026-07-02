@@ -3754,8 +3754,8 @@ async function syncFromCloud(){
     var now=Date.now();
     Object.entries(data).forEach(function(entry){
       var k=entry[0], item=entry[1];
-      // skip if edited locally in the last 60 seconds (give push time to land)
-      if((_editTs[k]||0) > (_cloudTs[k]||0)) return;
+      // skip keys edited locally in the last 30 seconds — let push complete first
+      if(Date.now()-(_editTs[k]||0)<30000) return;
       var v=(item&&typeof item==='object')?item.v:item;
       if(v) _origSet(k,v); else _origRem(k);
       _cloudTs[k]=now;
