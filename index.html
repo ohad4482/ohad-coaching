@@ -3661,42 +3661,60 @@ const _origSet=localStorage.setItem.bind(localStorage);
 const _origRem=localStorage.removeItem.bind(localStorage);
 const _origGet=localStorage.getItem.bind(localStorage);
 
-// Dirty set: keys edited locally but not yet confirmed pushed to cloud.
-// Persisted in localStorage so it survives page refresh.
-var _dirty=(function(){
-  try{var s=_origGet('_mc3_dirty');return s?new Set(JSON.parse(s)):new Set();}catch(e){return new Set();}
-})();
-function _saveDirty(){_origSet('_mc3_dirty',JSON.stringify(Array.from(_dirty)));}
+// Per-key edit timestamps (in-memory). Set on every local write.
+// Used to skip applying cloud data for keys edited in the last 60s.
+var _editTs={};
+
+// Track last time each key was pulled from cloud
+var _cloudTs={};
 
 var _pushTimer=null;
 function schedulePush(){
   if(_pushTimer)clearTimeout(_pushTimer);
-  _pushTimer=setTimeout(pushToCloud,400);
+  _pushTimer=setTimeout(pushToCloud,300);
+}
+
+function _buildPushData(){
+  // Push all keys edited more recently than last cloud pull for that key
+  var d={};
+  var now=Date.now();
+  for(var i=0;i<localStorage.length;i++){
+    var k=localStorage.key(i);
+    if(!isAppKey(k)) continue;
+    var et=_editTs[k]||0;
+    var ct=_cloudTs[k]||0;
+    if(et>ct){var v=_origGet(k);if(v!==null)d[k]=v;}
+  }
+  return d;
 }
 
 async function pushToCloud(){
   if(_pushTimer){clearTimeout(_pushTimer);_pushTimer=null;}
-  if(!_dirty.size) return;
-  var d={};
-  _dirty.forEach(function(k){var v=_origGet(k);if(v!==null)d[k]=v;});
-  if(!Object.keys(d).length){_dirty.clear();_saveDirty();return;}
+  var d=_buildPushData();
+  if(!Object.keys(d).length) return;
   try{
     var r=await fetch('/api/sync/bulk',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});
     if(r.ok){
-      Object.keys(d).forEach(function(k){_dirty.delete(k);});
-      _saveDirty();
+      var now=Date.now();
+      Object.keys(d).forEach(function(k){_cloudTs[k]=now;});
     }
   }catch(e){}
 }
 
-// override localStorage — every app-key write marks key dirty and schedules push
+function _beaconPush(){
+  var d=_buildPushData();
+  if(!Object.keys(d).length) return;
+  navigator.sendBeacon('/api/sync/bulk',new Blob([JSON.stringify(d)],{type:'application/json'}));
+}
+
+// override localStorage — every app-key write records edit time and schedules push
 localStorage.setItem=function(k,v){
   _origSet(k,v);
-  if(isAppKey(k)){_dirty.add(k);_saveDirty();schedulePush();}
+  if(isAppKey(k)){_editTs[k]=Date.now();schedulePush();}
 };
 localStorage.removeItem=function(k){
   _origRem(k);
-  if(isAppKey(k)){_dirty.add(k);_saveDirty();schedulePush();}
+  if(isAppKey(k)){_editTs[k]=Date.now();schedulePush();}
 };
 
 async function pushAllToCloud(){
@@ -3708,12 +3726,13 @@ async function pushAllToCloud(){
       var k=localStorage.key(i);
       if(isAppKey(k)){var v=_origGet(k);if(v)all[k]=v;}
     }
-    var keys=Object.keys(all);
-    if(!keys.length){if(btn){btn.textContent='☁️ סנכרן הכל';btn.disabled=false;}return;}
+    if(!Object.keys(all).length){if(btn){btn.textContent='☁️ סנכרן הכל';btn.disabled=false;}return;}
     var r=await fetch('/api/sync/bulk',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(all)});
     if(r.ok){
+      var now=Date.now();
+      Object.keys(all).forEach(function(k){_cloudTs[k]=now;_editTs[k]=now;});
       if(btn){btn.textContent='✅ הועלה!';setTimeout(function(){btn.textContent='☁️ סנכרן הכל';btn.disabled=false;},2000);}
-    } else {
+    }else{
       if(btn){btn.textContent='❌ שגיאה';setTimeout(function(){btn.textContent='☁️ סנכרן הכל';btn.disabled=false;},2000);}
     }
   }catch(e){
@@ -3723,26 +3742,22 @@ async function pushAllToCloud(){
 
 async function syncFromCloud(){
   try{
-    console.log('[SYNC] start dirty=',[..._dirty]);
-    // push any dirty keys first
-    if(_dirty.size>0){
-      console.log('[SYNC] pushing dirty before pull');
-      await pushToCloud();
-      console.log('[SYNC] after push, dirty=',[..._dirty]);
-    }
-    // pull cloud — apply everything except keys still dirty (edited but not yet pushed)
-    const res=await fetch('/api/sync');
-    if(!res.ok){console.error('[SYNC] GET failed',res.status);return;}
-    const data=await res.json();
-    let applied=0,skipped=0;
-    Object.entries(data).forEach(function([k,item]){
-      if(_dirty.has(k)){skipped++;return;}
-      const v=(item&&typeof item==='object')?item.v:item;
+    // push any locally-edited keys first
+    await pushToCloud();
+    // pull cloud
+    var res=await fetch('/api/sync');
+    if(!res.ok) return;
+    var data=await res.json();
+    var now=Date.now();
+    Object.entries(data).forEach(function(entry){
+      var k=entry[0], item=entry[1];
+      // skip if edited locally in the last 60 seconds (give push time to land)
+      if((_editTs[k]||0) > (_cloudTs[k]||0)) return;
+      var v=(item&&typeof item==='object')?item.v:item;
       if(v) _origSet(k,v); else _origRem(k);
-      applied++;
+      _cloudTs[k]=now;
     });
-    console.log('[SYNC] done: applied='+applied+' skipped='+skipped+' dirty=',[..._dirty]);
-  }catch(e){console.error('[SYNC] error',e);}
+  }catch(e){console.error('[SYNC]',e);}
 }
 
 // ===== HOME SCREEN =====
@@ -4096,11 +4111,15 @@ document.addEventListener('DOMContentLoaded',async function(){
   selRole('coach');
   await syncFromCloud();
   if(ROLE==='athlete')rendHome();
-  setInterval(pushToCloud, 5000);
+  // push every 3 seconds, pull from cloud every 10 seconds
+  setInterval(pushToCloud, 3000);
+  setInterval(syncFromCloud, 10000);
+  // guarantee push on page close/refresh via sendBeacon
+  window.addEventListener('pagehide', _beaconPush);
+  window.addEventListener('beforeunload', _beaconPush);
   document.addEventListener('visibilitychange', function(){
-    if(document.visibilityState==='hidden'){
-      pushToCloud();
-    }
+    if(document.visibilityState==='hidden') _beaconPush();
+    else syncFromCloud();
   });
 });
 
