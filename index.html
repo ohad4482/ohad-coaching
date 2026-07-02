@@ -3674,6 +3674,7 @@ function _markDirty(k){_dirty[k]=true;_saveDirty();}
 function _clearDirty(k){delete _dirty[k];_saveDirty();}
 
 var _pushTimer=null;
+var _pushInFlight=false;
 function schedulePush(){
   if(_pushTimer)clearTimeout(_pushTimer);
   _pushTimer=setTimeout(pushToCloud,300);
@@ -3691,18 +3692,20 @@ function _buildPushData(){
 
 async function pushToCloud(){
   if(_pushTimer){clearTimeout(_pushTimer);_pushTimer=null;}
+  if(_pushInFlight){schedulePush();return;} // wait for current push to finish
   var d=_buildPushData();
   if(!Object.keys(d).length) return;
-  console.log('[PUSH] sending keys:', Object.keys(d));
+  _pushInFlight=true;
   try{
     var r=await fetch('/api/sync/bulk',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});
     if(r.ok){
-      console.log('[PUSH] success:', Object.keys(d));
-      Object.keys(d).forEach(function(k){_clearDirty(k);});
-    } else {
-      console.error('[PUSH] failed status:', r.status);
+      // Only clear dirty if value hasn't changed since we built the snapshot
+      Object.keys(d).forEach(function(k){
+        if(_origGet(k)===d[k])_clearDirty(k);
+      });
     }
-  }catch(e){console.error('[PUSH] error:', e);}
+  }catch(e){}
+  finally{_pushInFlight=false;}
 }
 
 function _beaconPush(){
