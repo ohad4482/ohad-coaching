@@ -4108,7 +4108,7 @@ document.addEventListener('DOMContentLoaded',async function(){
   if(ROLE==='athlete')rendHome();
   // push every 3 seconds, pull from cloud every 10 seconds
   setInterval(pushToCloud, 3000);
-  setInterval(syncFromCloud, 10000);
+  setInterval(syncFromCloud, 3000);
   // guarantee push on page close/refresh via sendBeacon
   window.addEventListener('pagehide', _beaconPush);
   window.addEventListener('beforeunload', _beaconPush);
