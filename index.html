@@ -3693,12 +3693,16 @@ async function pushToCloud(){
   if(_pushTimer){clearTimeout(_pushTimer);_pushTimer=null;}
   var d=_buildPushData();
   if(!Object.keys(d).length) return;
+  console.log('[PUSH] sending keys:', Object.keys(d));
   try{
     var r=await fetch('/api/sync/bulk',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});
     if(r.ok){
+      console.log('[PUSH] success:', Object.keys(d));
       Object.keys(d).forEach(function(k){_clearDirty(k);});
+    } else {
+      console.error('[PUSH] failed status:', r.status);
     }
-  }catch(e){}
+  }catch(e){console.error('[PUSH] error:', e);}
 }
 
 function _beaconPush(){
