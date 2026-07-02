@@ -318,6 +318,7 @@ input.ph-prev::placeholder{color:rgba(160,165,185,0.7);font-style:italic;}
       <div style="margin-bottom:12px;display:flex;gap:8px;align-items:center;">
         <button class="btn btn-p" onclick="openAddAthlete()">+ מתאמן חדש</button>
         <button class="btn btn-s btn-sm" id="syncAllBtn" onclick="pushAllToCloud()" style="margin-right:auto;">☁️ סנכרן הכל</button>
+  <button class="btn btn-s btn-sm" onclick="showSyncLog()" style="font-size:11px;">🔍 לוג</button>
       </div>
       <div id="athListFull"></div>
     </div>
@@ -1303,8 +1304,8 @@ function sendWeeklyReminders(){
 
 // ===== WEIGHT =====
 var MH_W=['ינואר','פברואר','מרץ','אפריל','מאי','יוני','יולי','אוגוסט','ספטמבר','אוקטובר','נובמבר','דצמבר'];
-function LW(){return ld('wts')||[];}
-function SW(w){sv('wts',w);}
+function LW(){var w=ld('wts')||[];_slog('LW='+w.length);return w;}
+function SW(w){_slog('SW='+w.length);sv('wts',w);}
 var _drumVal=87.0; var WR=7; var _bArcVal=87.0; var _bArcDragging=false; var _bArcLX=0; var _bArcLDX=0;
 
 function initBodyArc(){
@@ -3664,12 +3665,16 @@ const _origSet=localStorage.setItem.bind(localStorage);
 const _origRem=localStorage.removeItem.bind(localStorage);
 const _origGet=localStorage.getItem.bind(localStorage);
 
+var _syncLog=[];
+function _slog(msg){_syncLog.push(new Date().toISOString().substr(11,8)+' '+msg);if(_syncLog.length>40)_syncLog.shift();}
+function showSyncLog(){alert(_syncLog.join('\n'));}
+
 // Persistent dirty set — survives page reloads.
 var _dirty={};
 function _loadDirty(){try{return JSON.parse(_origGet('_sync_dirty')||'{}');}catch(e){return{};}}
 function _saveDirty(){_origSet('_sync_dirty',JSON.stringify(_dirty));}
-function _markDirty(k){_dirty[k]=true;_saveDirty();console.log('[DIRTY] mark',k);}
-function _clearDirty(k){delete _dirty[k];_saveDirty();console.log('[DIRTY] clear',k);}
+function _markDirty(k){_dirty[k]=true;_saveDirty();_slog('MARK '+k.replace('mc3_2_',''));}
+function _clearDirty(k){delete _dirty[k];_saveDirty();_slog('CLEAR '+k.replace('mc3_2_',''));}
 
 var _pushTimer=null;
 var _pushInFlight=false;
@@ -3696,17 +3701,17 @@ async function pushToCloud(){
   if(!Object.keys(d).length) return;
   _pushInFlight=true;
   _pushAbort=new AbortController();
-  console.log('[PUSH] start',Object.keys(d));
+  _slog('PUSH '+Object.keys(d).map(function(k){return k.replace('mc3_2_','');}).join(','));
   try{
     var r=await fetch('/api/sync/bulk',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d),signal:_pushAbort.signal});
     if(r.ok){
-      console.log('[PUSH] ok',Object.keys(d));
+      _slog('PUSH_OK');
       Object.keys(d).forEach(function(k){
         if(_origGet(k)===d[k])_clearDirty(k);
-        else console.log('[PUSH] value changed during push, keeping dirty:',k);
+        else _slog('CHANGED_DURING_PUSH '+k.replace('mc3_2_',''));
       });
-    } else { console.error('[PUSH] server error',r.status); }
-  }catch(e){if(e.name!=='AbortError')console.error('[PUSH] error',e);}
+    } else { _slog('PUSH_ERR '+r.status); }
+  }catch(e){if(e.name!=='AbortError')_slog('PUSH_EXC '+e.message);}
   finally{_pushInFlight=false;_pushAbort=null;}
 }
 
@@ -3759,9 +3764,10 @@ async function syncFromCloud(){
     var data=await res.json();
     Object.entries(data).forEach(function(entry){
       var k=entry[0], item=entry[1];
-      if(_dirty[k]) return; // local edit not yet confirmed — never overwrite
+      if(_dirty[k]){_slog('PULL_SKIP '+k.replace('mc3_2_',''));return;}
       var v=(item&&typeof item==='object')?item.v:item;
-      if(v) _origSet(k,v); else _origRem(k);
+      if(v){_origSet(k,v);if(k==='mc3_2_wts')_slog('PULL_SET wts='+JSON.parse(v).length+'items');}
+      else _origRem(k);
     });
   }catch(e){console.error('[SYNC]',e);}
 }
