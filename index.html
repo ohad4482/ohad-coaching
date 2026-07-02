@@ -3665,16 +3665,15 @@ const _origRem=localStorage.removeItem.bind(localStorage);
 const _origGet=localStorage.getItem.bind(localStorage);
 
 // Persistent dirty set — survives page reloads.
-// A key stays dirty until its push is confirmed by the server.
-// While dirty, cloud pulls never overwrite the local value.
 var _dirty={};
 function _loadDirty(){try{return JSON.parse(_origGet('_sync_dirty')||'{}');}catch(e){return{};}}
 function _saveDirty(){_origSet('_sync_dirty',JSON.stringify(_dirty));}
-function _markDirty(k){_dirty[k]=true;_saveDirty();}
-function _clearDirty(k){delete _dirty[k];_saveDirty();}
+function _markDirty(k){_dirty[k]=true;_saveDirty();console.log('[DIRTY] mark',k);}
+function _clearDirty(k){delete _dirty[k];_saveDirty();console.log('[DIRTY] clear',k);}
 
 var _pushTimer=null;
 var _pushInFlight=false;
+var _pushAbort=null; // AbortController for in-flight push
 function schedulePush(){
   if(_pushTimer)clearTimeout(_pushTimer);
   _pushTimer=setTimeout(pushToCloud,300);
@@ -3692,25 +3691,31 @@ function _buildPushData(){
 
 async function pushToCloud(){
   if(_pushTimer){clearTimeout(_pushTimer);_pushTimer=null;}
-  if(_pushInFlight){schedulePush();return;} // wait for current push to finish
+  if(_pushInFlight){schedulePush();return;}
   var d=_buildPushData();
   if(!Object.keys(d).length) return;
   _pushInFlight=true;
+  _pushAbort=new AbortController();
+  console.log('[PUSH] start',Object.keys(d));
   try{
-    var r=await fetch('/api/sync/bulk',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});
+    var r=await fetch('/api/sync/bulk',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d),signal:_pushAbort.signal});
     if(r.ok){
-      // Only clear dirty if value hasn't changed since we built the snapshot
+      console.log('[PUSH] ok',Object.keys(d));
       Object.keys(d).forEach(function(k){
         if(_origGet(k)===d[k])_clearDirty(k);
+        else console.log('[PUSH] value changed during push, keeping dirty:',k);
       });
-    }
-  }catch(e){}
-  finally{_pushInFlight=false;}
+    } else { console.error('[PUSH] server error',r.status); }
+  }catch(e){if(e.name!=='AbortError')console.error('[PUSH] error',e);}
+  finally{_pushInFlight=false;_pushAbort=null;}
 }
 
 function _beaconPush(){
+  // Abort in-flight push so beacon (with latest data) wins
+  if(_pushAbort){_pushAbort.abort();console.log('[BEACON] aborted in-flight push');}
   var d=_buildPushData();
   if(!Object.keys(d).length) return;
+  console.log('[BEACON] sending',Object.keys(d));
   navigator.sendBeacon('/api/sync/bulk',new Blob([JSON.stringify(d)],{type:'application/json'}));
 }
 
