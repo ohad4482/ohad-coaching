@@ -4125,8 +4125,14 @@ document.addEventListener('DOMContentLoaded',async function(){
   window.addEventListener('pagehide', _beaconPush);
   window.addEventListener('beforeunload', _beaconPush);
   document.addEventListener('visibilitychange', function(){
-    if(document.visibilityState==='hidden') _beaconPush();
-    else syncFromCloud();
+    if(document.visibilityState==='hidden'){
+      _beaconPush();
+    } else {
+      // iOS Safari can freeze JS mid-push — reset stuck state on return to foreground
+      _pushInFlight=false;
+      if(_pushAbort){try{_pushAbort.abort();}catch(e){}_pushAbort=null;}
+      syncFromCloud();
+    }
   });
 });
 
