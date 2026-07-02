@@ -1623,7 +1623,10 @@ function saveWCC(){
   var m=document.getElementById('wcalModal');var ds=m._ds;
   var ws=LW();var idx=ws.findIndex(function(x){return x.d===ds;});
   if(idx>=0)ws[idx].w=v;else ws.push({d:ds,w:v});
-  SW(ws);m.style.display='none';_rendWCal2();rendWS();rendWC();_updateBDelta();
+  SW(ws);m.style.display='none';
+  // navigate calendar to the month of the saved date
+  var parts=ds.split('-');WCY=parseInt(parts[0]);WCM=parseInt(parts[1])-1;
+  _rendWCal2();rendWS();rendWC();_updateBDelta();
 }
 function delWCC(){
   var m=document.getElementById('wcalModal');var ds=m._ds;
