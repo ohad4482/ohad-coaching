@@ -720,7 +720,7 @@ function loadAths(){
   }
   return a;
 }
-function saveAths(arr){gsvk('omc_athletes',arr);}
+function saveAths(arr){gsvk('omc_athletes',arr);pushToCloud();}
 function nextAthId(arr){return arr.length?Math.max.apply(null,arr.map(function(a){return a.id;}))+1:0;}
 function getAth(id){return loadAths().find(function(a){return a.id===id;});}
 
@@ -1624,7 +1624,7 @@ function saveWCC(){
   var ws=LW();var idx=ws.findIndex(function(x){return x.d===ds;});
   if(idx>=0)ws[idx].w=v;else ws.push({d:ds,w:v});
   SW(ws);m.style.display='none';
-  // navigate calendar to the month of the saved date
+  pushToCloud();
   var parts=ds.split('-');WCY=parseInt(parts[0]);WCM=parseInt(parts[1])-1;
   _rendWCal2();rendWS();rendWC();_updateBDelta();
 }
@@ -1632,7 +1632,7 @@ function delWCC(){
   var m=document.getElementById('wcalModal');var ds=m._ds;
   if(!confirm('למחוק את השקילה של '+ds+'?'))return;
   SW(LW().filter(function(x){return x.d!==ds;}));
-  m.style.display='none';_rendWCal2();rendWS();rendWC();_updateBDelta();
+  m.style.display='none';pushToCloud();_rendWCal2();rendWS();rendWC();_updateBDelta();
 }
 // ===== STEPS =====
 function saveSt(){
@@ -3754,8 +3754,8 @@ async function syncFromCloud(){
     var now=Date.now();
     Object.entries(data).forEach(function(entry){
       var k=entry[0], item=entry[1];
-      // skip keys edited locally in the last 30 seconds — let push complete first
-      if(Date.now()-(_editTs[k]||0)<30000) return;
+      // never overwrite a key that has local edits not yet confirmed by cloud
+      if((_editTs[k]||0) > (_cloudTs[k]||0)) return;
       var v=(item&&typeof item==='object')?item.v:item;
       if(v) _origSet(k,v); else _origRem(k);
       _cloudTs[k]=now;
